@@ -7,24 +7,16 @@ import (
 
 // SVG color palette.
 const (
-	svgPrimary    = "#FF6B00"
-	svgSecondary  = "#8B0000"
-	svgAccent     = "#DC143C"
-	svgPurple     = "#4B0082"
-	svgPurpleDark = "#800080"
-	svgTextLight  = "#F5E6D3"
-	svgHighlight  = "#FFD700"
-	svgMuted      = "#1A4D1A"
-	svgBorder     = "#3D2D1F"
-	svgDim        = "#4A4A4A"
-	svgBright     = "#FF7518"
-	svgTransit    = "#00CED1"
-
-	// Vibrant element colors
-	svgFire  = "#FF4500" // Orange-red
-	svgEarth = "#32CD32" // Lime green
-	svgAir   = "#FFD700" // Gold
-	svgWater = "#1E90FF" // Dodger blue
+	svgPrimary   = "#FF6B00" // Orange
+	svgAccent    = "#DC143C" // Crimson
+	svgPurple    = "#4B0082" // Indigo
+	svgTextLight = "#F5E6D3" // Beige
+	svgBorder    = "#3D2D1F" // Dark brown
+	svgBright    = "#FF7518" // Orange-red
+	svgFire      = "#FF4500" // Orange-red
+	svgEarth     = "#32CD32" // Lime green
+	svgAir       = "#FFD700" // Gold
+	svgWater     = "#1E90FF" // Dodger blue
 )
 
 func getElementColor(elem horoscope.Element) string {

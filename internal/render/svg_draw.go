@@ -3,6 +3,7 @@ package render
 import (
 	"fmt"
 	"math"
+	"sort"
 
 	svg "github.com/ajstarks/svgo"
 
@@ -72,45 +73,67 @@ func (g *SVGWheelGenerator) drawAxes(canvas *svg.SVG) {
 
 func (g *SVGWheelGenerator) drawPlanetsRing(canvas *svg.SVG, positions []position.Position, radiusFactor float64, isTransit bool) {
 	planetRadius := float64(g.radius) * radiusFactor
-	placed := make(map[int]bool)
 
+	maxBody := position.Pluto
+	if isTransit {
+		maxBody = position.Neptune
+	}
+
+	// Filter and sort positions by longitude
+	var filtered []position.Position
 	for _, pos := range positions {
-		maxBody := position.Pluto
-		if isTransit {
-			maxBody = position.Neptune
+		if pos.Body <= maxBody {
+			filtered = append(filtered, pos)
 		}
-		if pos.Body > maxBody {
-			continue
-		}
+	}
+	sort.Slice(filtered, func(i, j int) bool {
+		return filtered[i].EclipticLongitude < filtered[j].EclipticLongitude
+	})
 
+	// Calculate radial offsets to avoid overlapping (threshold: 5°)
+	offsets := calculateRadialOffsets(filtered, 15.0)
+
+	for i, pos := range filtered {
 		angle := (90 - pos.EclipticLongitude) * math.Pi / 180
+		adjustedRadius := planetRadius + offsets[i]
 
-		offset := 0.0
-		for {
-			x := g.center + int((planetRadius+offset)*math.Cos(angle))
-			y := g.center - int((planetRadius+offset)*math.Sin(angle))
-			key := x*1000 + y
-			if !placed[key] {
-				placed[key] = true
+		x := g.center + int(adjustedRadius*math.Cos(angle))
+		y := g.center - int(adjustedRadius*math.Sin(angle))
 
-				var color, fontSize string
-				if isTransit {
-					color = svgSecondary
-					fontSize = "20px"
-				} else {
-					color = getPlanetSVGColor(pos.Body)
-					fontSize = "30px"
-				}
+		var color, fontSize string
+		if isTransit {
+			color = svgAccent
+			fontSize = "20px"
+		} else {
+			color = getPlanetSVGColor(pos.Body)
+			fontSize = "28px"
+		}
 
-				canvas.Text(x, y+5, pos.Body.Symbol(), fmt.Sprintf("font-size:%s;fill:%s;text-anchor:middle;font-family:sans-serif", fontSize, color))
-				break
-			}
-			offset -= 12
-			if offset < -48 {
-				break
+		canvas.Text(x, y+5, pos.Body.Symbol(), fmt.Sprintf("font-size:%s;fill:%s;text-anchor:middle;font-family:sans-serif", fontSize, color))
+	}
+}
+
+func calculateRadialOffsets(positions []position.Position, threshold float64) []float64 {
+	offsets := make([]float64, len(positions))
+	const offsetStep = -25.0
+
+	for i := 1; i < len(positions); i++ {
+		diff := positions[i].EclipticLongitude - positions[i-1].EclipticLongitude
+		if diff < 0 {
+			diff += 360
+		}
+		if diff > 180 {
+			diff = 360 - diff
+		}
+
+		if diff < threshold {
+			offsets[i] = offsets[i-1] + offsetStep
+			if offsets[i] < -60 {
+				offsets[i] = -60
 			}
 		}
 	}
+	return offsets
 }
 
 func (g *SVGWheelGenerator) drawAspects(canvas *svg.SVG, positions []position.Position) {

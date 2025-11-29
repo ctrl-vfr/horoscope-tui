@@ -9,19 +9,20 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 
+	"github.com/ctrl-vfr/horoscope-tui/internal/tui/styles"
 	"github.com/ctrl-vfr/horoscope-tui/pkg/horoscope"
 	"github.com/ctrl-vfr/horoscope-tui/pkg/position"
 )
 
 type Model struct {
-	viewport  viewport.Model
-	table     table.Model
-	transits  []position.Position
-	natal     []position.Position
-	chart     *horoscope.Chart
-	width     int
-	height    int
-	focused   bool
+	viewport viewport.Model
+	table    table.Model
+	transits []position.Position
+	natal    []position.Position
+	chart    *horoscope.Chart
+	width    int
+	height   int
+	focused  bool
 }
 
 func New() Model {
@@ -79,24 +80,36 @@ func (m Model) buildTable() table.Model {
 	var columns []table.Column
 	var rows []table.Row
 
+	// Available width for table content (minus borders and padding)
+	availableWidth := m.width - 9
+	availableWidth = max(availableWidth, 30)
+
 	if m.chart != nil {
-		// Both natal and transits
+		fixedWidth := 12
+		flexWidth := availableWidth - fixedWidth
+		planetWidth := flexWidth / 4
+		posWidth := (flexWidth - planetWidth) / 2
+
 		columns = []table.Column{
-			{Title: "", Width: 2},
-			{Title: "Planète", Width: 9},
-			{Title: "Natal", Width: 11},
-			{Title: "℞", Width: 2},
-			{Title: "Transit", Width: 11},
-			{Title: "℞", Width: 2},
+			{Title: "", Width: 3},
+			{Title: "Planète", Width: planetWidth},
+			{Title: "Natal", Width: posWidth},
+			{Title: "℞", Width: 3},
+			{Title: "Transit", Width: posWidth},
+			{Title: "℞", Width: 3},
 		}
 		rows = m.buildCombinedRows()
 	} else {
-		// Transits only
+		fixedWidth := 9
+		flexWidth := availableWidth - fixedWidth
+		planetWidth := flexWidth / 3
+		posWidth := flexWidth - planetWidth
+
 		columns = []table.Column{
-			{Title: "", Width: 2},
-			{Title: "Planète", Width: 10},
-			{Title: "Position", Width: 12},
-			{Title: "℞", Width: 2},
+			{Title: "", Width: 3},
+			{Title: "Planète", Width: planetWidth},
+			{Title: "Position", Width: posWidth},
+			{Title: "℞", Width: 3},
 		}
 		rows = m.buildTransitRows()
 	}
@@ -104,15 +117,11 @@ func (m Model) buildTable() table.Model {
 	s := table.DefaultStyles()
 	s.Header = s.Header.
 		BorderStyle(lipgloss.NormalBorder()).
-		BorderForeground(lipgloss.Color("240")).
+		BorderForeground(lipgloss.Color("94")).
 		BorderBottom(true).
 		Bold(true).
-		Foreground(lipgloss.Color("202"))
-	s.Selected = s.Selected.
-		Foreground(lipgloss.Color("229")).
-		Background(lipgloss.Color("57")).
-		Bold(false)
-	s.Cell = s.Cell.Foreground(lipgloss.Color("252"))
+		Foreground(styles.ColorBright)
+	s.Cell = s.Cell.Foreground(styles.ColorTextWarm)
 
 	t := table.New(
 		table.WithColumns(columns),
@@ -183,7 +192,7 @@ func (m Model) buildCombinedRows() []table.Row {
 func (m Model) View() string {
 	borderColor := lipgloss.Color("94")
 	if m.focused {
-		borderColor = lipgloss.Color("208")
+		borderColor = styles.ColorPrimary
 	}
 
 	title := "Transits"
@@ -193,14 +202,14 @@ func (m Model) View() string {
 
 	header := lipgloss.NewStyle().
 		Bold(true).
-		Foreground(lipgloss.Color("202")).
+		Foreground(styles.ColorBright).
 		Render(title)
 
 	box := lipgloss.NewStyle().
 		Border(lipgloss.RoundedBorder()).
 		BorderForeground(borderColor).
-		Width(m.width - 2).
-		Height(m.height - 2).
+		Width(m.width-2).
+		Height(m.height-2).
 		Padding(0, 1)
 
 	return box.Render(header + "\n" + m.viewport.View())
