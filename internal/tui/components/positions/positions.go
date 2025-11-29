@@ -2,7 +2,7 @@ package positions
 
 import (
 	"fmt"
-	"strings"
+	"time"
 
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
