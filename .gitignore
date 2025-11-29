@@ -1,0 +1,32 @@
+# Binary
+horoscope
+*.exe
+
+# Environment
+.env
+.env.local
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Go
+vendor/
+*.test
+*.out
+coverage.html
+
+# Claude Code
+CLAUDE.md
+.claude/
+
+# Generated
+*.svg
+*.png
