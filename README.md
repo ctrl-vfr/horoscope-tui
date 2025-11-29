@@ -4,12 +4,12 @@ Parce que la science n'explique pas tout et l'informatique c'est surfait, voici 
 
 Calcule la position des planètes avec de jolies équations et génère une jolie roue du zodiaque. Laissez un Oracle vous expliquer pourquoi Mercure rétrograde a encore cassé la prod.
 
-![Screenshot](screenshot.png)
+![Screenshot](./screenshot.png)
 
 ## Installation
 
 ```bash
-go install github.com/ctrl-vfr/horoscope-tui/cmd@latest
+go install github.com/ctrl-vfr/horoscope-tui@latest
 ```
 
 ## Prérequis
