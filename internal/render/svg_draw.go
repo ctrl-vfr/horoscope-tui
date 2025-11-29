@@ -11,12 +11,9 @@ import (
 )
 
 func (g *SVGWheelGenerator) drawOuterWheel(canvas *svg.SVG) {
-	canvas.Circle(g.center, g.center, g.radius+2,
-		fmt.Sprintf("fill:none;stroke:%s;stroke-width:1;opacity:0.3", svgPrimary))
-	canvas.Circle(g.center, g.center, g.radius,
-		fmt.Sprintf("fill:none;stroke:%s;stroke-width:3", svgPrimary))
-	canvas.Circle(g.center, g.center, g.radius-15,
-		fmt.Sprintf("fill:none;stroke:%s;stroke-width:1", svgBorder))
+	canvas.Circle(g.center, g.center, g.radius, fmt.Sprintf("fill:none;stroke:%s;stroke-width:1;opacity:0.3", svgPrimary))
+	canvas.Circle(g.center, g.center, g.radius, fmt.Sprintf("fill:none;stroke:%s;stroke-width:1", svgPrimary))
+	canvas.Circle(g.center, g.center, g.radius-54, fmt.Sprintf("fill:none;stroke:%s;stroke-width:1", svgBorder))
 }
 
 func (g *SVGWheelGenerator) drawZodiacSegments(canvas *svg.SVG) {
@@ -40,47 +37,37 @@ func (g *SVGWheelGenerator) drawZodiacSegments(canvas *svg.SVG) {
 
 	for _, s := range signs {
 		angle := (90 - s.start) * math.Pi / 180
-		x1 := g.center + int(float64(g.radius-15)*math.Cos(angle))
-		y1 := g.center - int(float64(g.radius-15)*math.Sin(angle))
+		x1 := g.center + int(float64(g.radius-54)*math.Cos(angle))
+		y1 := g.center - int(float64(g.radius-54)*math.Sin(angle))
 		x2 := g.center + int(float64(g.radius)*math.Cos(angle))
 		y2 := g.center - int(float64(g.radius)*math.Sin(angle))
-		canvas.Line(x1, y1, x2, y2, fmt.Sprintf("stroke:%s;stroke-width:1", svgBorder))
+		canvas.Line(x1, y1, x2, y2, fmt.Sprintf("stroke:%s;stroke-width:2", svgBorder))
 
 		midAngle := (90 - s.start - 15) * math.Pi / 180
-		symbolRadius := float64(g.radius) - 8
+		symbolRadius := float64(g.radius) - 25
 		sx := g.center + int(symbolRadius*math.Cos(midAngle))
 		sy := g.center - int(symbolRadius*math.Sin(midAngle))
 
 		color := getElementColor(s.sign.Element())
-		canvas.Text(sx, sy+5, s.sign.Symbol(),
-			fmt.Sprintf("font-size:16px;fill:%s;text-anchor:middle;font-family:sans-serif", color))
+		canvas.Text(sx, sy+14, s.sign.Symbol(), fmt.Sprintf("font-size:34px;fill:%s;text-anchor:middle;font-family:sans-serif", color))
 	}
 }
 
 func (g *SVGWheelGenerator) drawInnerCircle(canvas *svg.SVG) {
 	innerRadius := int(float64(g.radius) * 0.65)
-	canvas.Circle(g.center, g.center, innerRadius,
-		fmt.Sprintf("fill:none;stroke:%s;stroke-width:2", svgBorder))
-	canvas.Circle(g.center, g.center, 6, fmt.Sprintf("fill:%s;opacity:0.3", svgBright))
+	canvas.Circle(g.center, g.center, innerRadius, fmt.Sprintf("fill:none;stroke:%s;stroke-width:1", svgPrimary))
+	canvas.Circle(g.center, g.center, 8, fmt.Sprintf("fill:%s;opacity:0.3", svgBright))
 	canvas.Circle(g.center, g.center, 4, fmt.Sprintf("fill:%s", svgBright))
 }
 
 func (g *SVGWheelGenerator) drawAxes(canvas *svg.SVG) {
 	innerRadius := int(float64(g.radius) * 0.65)
-
-	canvas.Line(g.center, g.center-innerRadius, g.center, g.center+innerRadius,
-		fmt.Sprintf("stroke:%s;stroke-width:1;stroke-dasharray:5,3", svgPurple))
-	canvas.Line(g.center-innerRadius, g.center, g.center+innerRadius, g.center,
-		fmt.Sprintf("stroke:%s;stroke-width:1;stroke-dasharray:5,3", svgPurple))
-
-	canvas.Text(g.center, g.center-innerRadius-8, "MC",
-		fmt.Sprintf("font-size:10px;fill:%s;text-anchor:middle", svgTextLight))
-	canvas.Text(g.center, g.center+innerRadius+14, "IC",
-		fmt.Sprintf("font-size:10px;fill:%s;text-anchor:middle", svgTextLight))
-	canvas.Text(g.center+innerRadius+10, g.center+4, "ASC",
-		fmt.Sprintf("font-size:10px;fill:%s;text-anchor:start", svgTextLight))
-	canvas.Text(g.center-innerRadius-10, g.center+4, "DSC",
-		fmt.Sprintf("font-size:10px;fill:%s;text-anchor:end", svgTextLight))
+	canvas.Line(g.center, g.center-innerRadius, g.center, g.center+innerRadius, fmt.Sprintf("stroke:%s;stroke-width:1;stroke-dasharray:5,3", svgPurple))
+	canvas.Line(g.center-innerRadius, g.center, g.center+innerRadius, g.center, fmt.Sprintf("stroke:%s;stroke-width:1;stroke-dasharray:5,3", svgPurple))
+	canvas.Text(g.center, g.center-innerRadius-8, "MC", fmt.Sprintf("font-size:10px;fill:%s;text-anchor:middle", svgTextLight))
+	canvas.Text(g.center, g.center+innerRadius+14, "IC", fmt.Sprintf("font-size:10px;fill:%s;text-anchor:middle", svgTextLight))
+	canvas.Text(g.center+innerRadius+10, g.center+4, "ASC", fmt.Sprintf("font-size:10px;fill:%s;text-anchor:start", svgTextLight))
+	canvas.Text(g.center-innerRadius-10, g.center+4, "DSC", fmt.Sprintf("font-size:10px;fill:%s;text-anchor:end", svgTextLight))
 }
 
 func (g *SVGWheelGenerator) drawPlanetsRing(canvas *svg.SVG, positions []position.Position, radiusFactor float64, isTransit bool) {
@@ -90,7 +77,7 @@ func (g *SVGWheelGenerator) drawPlanetsRing(canvas *svg.SVG, positions []positio
 	for _, pos := range positions {
 		maxBody := position.Pluto
 		if isTransit {
-			maxBody = position.Saturn
+			maxBody = position.Neptune
 		}
 		if pos.Body > maxBody {
 			continue
@@ -108,16 +95,14 @@ func (g *SVGWheelGenerator) drawPlanetsRing(canvas *svg.SVG, positions []positio
 
 				var color, fontSize string
 				if isTransit {
-					color = svgTransit
-					fontSize = "14px"
-					canvas.Circle(x, y, 10, fmt.Sprintf("fill:%s;opacity:0.2", svgTransit))
+					color = svgSecondary
+					fontSize = "20px"
 				} else {
 					color = getPlanetSVGColor(pos.Body)
-					fontSize = "18px"
+					fontSize = "30px"
 				}
 
-				canvas.Text(x, y+5, pos.Body.Symbol(),
-					fmt.Sprintf("font-size:%s;fill:%s;text-anchor:middle;font-family:sans-serif", fontSize, color))
+				canvas.Text(x, y+5, pos.Body.Symbol(), fmt.Sprintf("font-size:%s;fill:%s;text-anchor:middle;font-family:sans-serif", fontSize, color))
 				break
 			}
 			offset -= 12
