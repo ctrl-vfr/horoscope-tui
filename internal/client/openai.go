@@ -44,7 +44,6 @@ TON STYLE:
 REGLES:
 - Réponds DIRECTEMENT à la question (pas de généralités!)
 - UTILISE les transits ET le natal, pas juste l'un ou l'autre
-- Les planètes RÉTROGRADES sont importantes: elles indiquent des énergies tournées vers l'intérieur, des révisions, des retards ou des leçons du passé
 - Français, 300-400 mots max
 - Répond en markdown`
 

@@ -4,18 +4,20 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/charmbracelet/bubbles/table"
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 
-	"github.com/ctrl-vfr/horoscope-tui/internal/tui/styles"
 	"github.com/ctrl-vfr/horoscope-tui/pkg/horoscope"
 	"github.com/ctrl-vfr/horoscope-tui/pkg/position"
 )
 
 type Model struct {
 	viewport  viewport.Model
-	positions []position.Position
+	table     table.Model
+	transits  []position.Position
+	natal     []position.Position
 	chart     *horoscope.Chart
 	width     int
 	height    int
@@ -41,24 +43,30 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 func (m Model) SetSize(width, height int) Model {
 	m.width = width
 	m.height = height
-	// viewport = total - border(2) - header(2)
 	m.viewport = viewport.New(width-4, height-5)
-	m.viewport.SetContent(m.buildContent())
+	m.table = m.buildTable()
+	m.viewport.SetContent(m.table.View())
 	return m
 }
 
 func (m Model) SetPositions(positions []position.Position) Model {
-	m.positions = positions
+	// Always show current transits before chart validation
+	m.transits = position.CalculateAll(time.Now())
 	if m.width > 0 {
-		m.updateContent()
+		m.table = m.buildTable()
+		m.viewport.SetContent(m.table.View())
 	}
 	return m
 }
 
 func (m Model) SetChart(chart *horoscope.Chart) Model {
 	m.chart = chart
-	m.positions = chart.Positions
-	m.updateContent()
+	m.natal = chart.Positions
+	m.transits = position.CalculateAll(time.Now())
+	if m.width > 0 {
+		m.table = m.buildTable()
+		m.viewport.SetContent(m.table.View())
+	}
 	return m
 }
 
@@ -67,52 +75,109 @@ func (m Model) SetFocus(focused bool) Model {
 	return m
 }
 
-func (m *Model) updateContent() {
-	m.viewport.SetContent(m.buildContent())
-}
+func (m Model) buildTable() table.Model {
+	var columns []table.Column
+	var rows []table.Row
 
-func (m Model) buildContent() string {
-	if len(m.positions) == 0 {
-		return "En attente..."
+	if m.chart != nil {
+		// Both natal and transits
+		columns = []table.Column{
+			{Title: "", Width: 2},
+			{Title: "Planète", Width: 9},
+			{Title: "Natal", Width: 11},
+			{Title: "℞", Width: 2},
+			{Title: "Transit", Width: 11},
+			{Title: "℞", Width: 2},
+		}
+		rows = m.buildCombinedRows()
+	} else {
+		// Transits only
+		columns = []table.Column{
+			{Title: "", Width: 2},
+			{Title: "Planète", Width: 10},
+			{Title: "Position", Width: 12},
+			{Title: "℞", Width: 2},
+		}
+		rows = m.buildTransitRows()
 	}
 
-	var sb strings.Builder
+	s := table.DefaultStyles()
+	s.Header = s.Header.
+		BorderStyle(lipgloss.NormalBorder()).
+		BorderForeground(lipgloss.Color("240")).
+		BorderBottom(true).
+		Bold(true).
+		Foreground(lipgloss.Color("202"))
+	s.Selected = s.Selected.
+		Foreground(lipgloss.Color("229")).
+		Background(lipgloss.Color("57")).
+		Bold(false)
+	s.Cell = s.Cell.Foreground(lipgloss.Color("252"))
 
-	for _, pos := range m.positions {
+	t := table.New(
+		table.WithColumns(columns),
+		table.WithRows(rows),
+		table.WithHeight(len(rows)+1),
+		table.WithStyles(s),
+	)
+	t.Blur()
+
+	return t
+}
+
+func (m Model) buildTransitRows() []table.Row {
+	rows := make([]table.Row, 0, len(m.transits))
+	for _, pos := range m.transits {
 		zodiac := horoscope.LongitudeToZodiac(pos.EclipticLongitude)
-		retro := " "
+		retro := ""
 		if pos.Retrograde {
 			retro = position.RetrogradeSymbol
 		}
-		line := fmt.Sprintf(" %s %-8s %02d°%02d' %s %s\n",
-			styles.StylePlanet(pos.Body),
+		rows = append(rows, table.Row{
+			pos.Body.Symbol(),
 			pos.Body.String(),
-			zodiac.Degrees,
-			zodiac.Minutes,
-			styles.StyleSign(zodiac.Sign),
-			retro)
-		sb.WriteString(line)
+			fmt.Sprintf("%s %02d°%02d'", zodiac.Sign.Symbol(), zodiac.Degrees, zodiac.Minutes),
+			retro,
+		})
 	}
-
-	// Element distribution
-	sb.WriteString("\n")
-	elements := m.countElements()
-	sb.WriteString(fmt.Sprintf(" %s %s\n %s %s\n",
-		styles.FireStyle.Render(fmt.Sprintf("Feu:%d", elements[horoscope.Fire])),
-		styles.EarthStyle.Render(fmt.Sprintf("Terre:%d", elements[horoscope.Earth])),
-		styles.AirStyle.Render(fmt.Sprintf("Air:%d", elements[horoscope.Air])),
-		styles.WaterStyle.Render(fmt.Sprintf("Eau:%d", elements[horoscope.Water]))))
-
-	return sb.String()
+	return rows
 }
 
-func (m Model) countElements() map[horoscope.Element]int {
-	result := make(map[horoscope.Element]int)
-	for _, pos := range m.positions {
-		zodiac := horoscope.LongitudeToZodiac(pos.EclipticLongitude)
-		result[zodiac.Sign.Element()]++
+func (m Model) buildCombinedRows() []table.Row {
+	rows := make([]table.Row, 0)
+
+	transitMap := make(map[position.CelestialBody]position.Position)
+	for _, pos := range m.transits {
+		transitMap[pos.Body] = pos
 	}
-	return result
+
+	for _, natal := range m.natal {
+		natalZodiac := horoscope.LongitudeToZodiac(natal.EclipticLongitude)
+		natalRetro := ""
+		if natal.Retrograde {
+			natalRetro = position.RetrogradeSymbol
+		}
+
+		transitPos := ""
+		transitRetro := ""
+		if transit, ok := transitMap[natal.Body]; ok {
+			transitZodiac := horoscope.LongitudeToZodiac(transit.EclipticLongitude)
+			transitPos = fmt.Sprintf("%s %02d°%02d'", transitZodiac.Sign.Symbol(), transitZodiac.Degrees, transitZodiac.Minutes)
+			if transit.Retrograde {
+				transitRetro = position.RetrogradeSymbol
+			}
+		}
+
+		rows = append(rows, table.Row{
+			natal.Body.Symbol(),
+			natal.Body.String(),
+			fmt.Sprintf("%s %02d°%02d'", natalZodiac.Sign.Symbol(), natalZodiac.Degrees, natalZodiac.Minutes),
+			natalRetro,
+			transitPos,
+			transitRetro,
+		})
+	}
+	return rows
 }
 
 func (m Model) View() string {
@@ -121,16 +186,21 @@ func (m Model) View() string {
 		borderColor = lipgloss.Color("208")
 	}
 
+	title := "Transits"
+	if m.chart != nil {
+		title = "Natal / Transits"
+	}
+
 	header := lipgloss.NewStyle().
 		Bold(true).
 		Foreground(lipgloss.Color("202")).
-		Render("Positions")
+		Render(title)
 
 	box := lipgloss.NewStyle().
 		Border(lipgloss.RoundedBorder()).
 		BorderForeground(borderColor).
-		Width(m.width-2).
-		Height(m.height-2).
+		Width(m.width - 2).
+		Height(m.height - 2).
 		Padding(0, 1)
 
 	return box.Render(header + "\n" + m.viewport.View())

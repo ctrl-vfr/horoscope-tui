@@ -19,63 +19,69 @@ const (
 	svgDim        = "#4A4A4A"
 	svgBright     = "#FF7518"
 	svgTransit    = "#00CED1"
+
+	// Vibrant element colors
+	svgFire  = "#FF4500" // Orange-red
+	svgEarth = "#32CD32" // Lime green
+	svgAir   = "#FFD700" // Gold
+	svgWater = "#1E90FF" // Dodger blue
 )
 
 func getElementColor(elem horoscope.Element) string {
 	switch elem {
 	case horoscope.Fire:
-		return svgPrimary
+		return svgFire
 	case horoscope.Earth:
-		return "#8B4513"
+		return svgEarth
 	case horoscope.Air:
-		return svgDim
+		return svgAir
 	case horoscope.Water:
-		return svgPurpleDark
+		return svgWater
 	default:
-		return svgDim
+		return svgTextLight
 	}
 }
 
 func getPlanetSVGColor(body position.CelestialBody) string {
 	switch body {
 	case position.Sun:
-		return svgPrimary
+		return "#FFD700" // Gold
 	case position.Moon:
-		return svgTextLight
+		return "#E6E6FA" // Lavender (silvery)
 	case position.Mercury:
-		return svgBright
+		return "#FFA500" // Orange
 	case position.Venus:
-		return "#FF69B4"
+		return "#FF69B4" // Hot pink
 	case position.Mars:
-		return svgAccent
+		return "#FF4444" // Bright red
 	case position.Jupiter:
-		return svgPurple
+		return "#9370DB" // Medium purple
 	case position.Saturn:
-		return "#8B4513"
+		return "#DAA520" // Goldenrod
 	case position.Uranus:
-		return svgMuted
+		return "#00CED1" // Dark turquoise
 	case position.Neptune:
-		return svgPurpleDark
+		return "#4169E1" // Royal blue
 	case position.Pluto:
-		return svgSecondary
+		return "#DC143C" // Crimson
 	default:
-		return svgDim
+		return svgTextLight
 	}
 }
 
 func getAspectColor(aspectType horoscope.AspectType) string {
 	switch aspectType {
 	case horoscope.Conjunction:
-		return svgHighlight
+		return "#FFD700" // Gold
 	case horoscope.Sextile:
-		return svgPrimary
+		return "#32CD32" // Lime green (harmonious)
 	case horoscope.Trine:
-		return svgBright
+		return "#00BFFF" // Deep sky blue (harmonious)
 	case horoscope.Square:
-		return svgAccent
+		return "#FF4500" // Orange-red (tension)
 	case horoscope.Opposition:
-		return svgSecondary
+		return "#FF1493" // Deep pink (tension)
 	default:
-		return svgDim
+		return svgTextLight
 	}
 }
