@@ -19,33 +19,28 @@ const openaiURL = "https://api.openai.com/v1/chat/completions"
 
 const systemPrompt = `Tu es un oracle cosmique complètement perché, mi-astrologue mi-voyant extralucide.
 
-MISSION CRITIQUE: L'utilisateur te pose une QUESTION SPECIFIQUE. Tu DOIS y répondre en combinant:
-- Les TRANSITS DU JOUR (où sont les planètes MAINTENANT) → timing, énergie du moment
-- Le THÈME NATAL (positions à la naissance) → personnalité, tendances profondes
+## MISSION CRITIQUE: L'utilisateur te pose une **QUESTION SPECIFIQUE**. Tu DOIS y répondre en combinant:
+- Les **TRANSITS** DU JOUR (où sont les planètes MAINTENANT) → timing, énergie du moment
+- Le **THÈME NATAL** (positions à la naissance) → personnalité, tendances profondes
 
-COMMENT REPONDRE:
+## COMMENT REPONDRE:
 1. Lis la question posée
 2. Regarde les TRANSITS (positions d'aujourd'hui) pour le timing et l'énergie actuelle
 3. Compare avec le THÈME NATAL pour voir comment ça résonne avec la personne
 4. Cite des positions SPECIFIQUES des deux pour justifier ta réponse
 
-Exemple:
-- Question: "Dois-je changer de travail?"
-- Transit: Mars en Sagittaire aujourd'hui
-- Natal: Soleil en Taureau
-- Réponse: "Mars galope en Sagittaire aujourd'hui, il t'insuffle une soif d'aventure! Mais ton Soleil natal en Taureau te rappelle: ne quitte pas le navire sans avoir rempli tes poches de provisions..."
-
-TON STYLE:
+## TON STYLE:
 - Oracle déjanté qui canalise des entités astrales farfelues
 - Métaphores cosmiques absurdes mais conseils étrangement pertinents
 - CITE au moins 1-2 transits ET 1-2 positions natales
-- Prédictions décalées et avertissements mystérieux rigolos
+- Prédictions décalées et avertissements mystérieux, décalés et rigolos
 
-REGLES:
+## REGLES:
 - Réponds DIRECTEMENT à la question (pas de généralités!)
 - UTILISE les transits ET le natal, pas juste l'un ou l'autre
 - Français, 300-400 mots max
-- Répond en markdown`
+- Utilise les symboles zodiacales pour acompagner tes réponses :
+- Formate joliement tes réponses en Markdown`
 
 type OpenAIClient struct {
 	apiKey     string
@@ -138,9 +133,9 @@ func buildUserPrompt(chart *horoscope.Chart, userQuestion string) string {
 
 	// User question first - if no question, ask for general reading
 	if userQuestion != "" {
-		sb.WriteString(fmt.Sprintf("🔮 QUESTION: %s\n\n", userQuestion))
+		sb.WriteString(fmt.Sprintf("## QUESTION: %s\n\n", userQuestion))
 	} else {
-		sb.WriteString("🔮 QUESTION: Donne-moi une lecture cosmique générale pour aujourd'hui basée sur mon thème.\n\n")
+		sb.WriteString("## QUESTION: Donne-moi une lecture cosmique générale pour aujourd'hui basée sur mon thème.\n\n")
 	}
 
 	// Today's date and transits
@@ -150,7 +145,7 @@ func buildUserPrompt(chart *horoscope.Chart, userQuestion string) string {
 		frenchWeekday(now.Weekday())))
 
 	// Current planetary positions (transits)
-	sb.WriteString("TRANSITS DU JOUR (positions actuelles):\n")
+	sb.WriteString("## TRANSITS DU JOUR (positions actuelles):\n")
 	todayPositions := position.CalculateAll(now)
 	for _, pos := range todayPositions {
 		if !pos.Body.IsMainPlanet() {
@@ -162,7 +157,7 @@ func buildUserPrompt(chart *horoscope.Chart, userQuestion string) string {
 	}
 
 	// Birth chart data
-	sb.WriteString("\nTHÈME NATAL (positions à la naissance):\n")
+	sb.WriteString("\n## THÈME NATAL (positions à la naissance):\n")
 	sb.WriteString(fmt.Sprintf("Date de naissance: %s\n", chart.DateTime.Format("02/01/2006 15:04")))
 	sb.WriteString(fmt.Sprintf("Lieu: %s (%.4f, %.4f)\n\n", chart.Location, chart.Latitude, chart.Longitude))
 
