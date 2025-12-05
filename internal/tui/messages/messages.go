@@ -16,6 +16,10 @@ type DateChangedMsg struct {
 	Date time.Time
 }
 
+type TransitDateChangedMsg struct {
+	Date time.Time
+}
+
 // Geocoding messages
 type GeocodingResultMsg struct {
 	Latitude    float64

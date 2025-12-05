@@ -15,25 +15,29 @@ import (
 )
 
 type Model struct {
-	form          *huh.Form
-	dateStr       string
-	lastValidDate string
-	userContext   string
-	city          string
-	width         int
-	height        int
-	submitted     bool
-	loading       bool
-	err           error
-	missingCity   bool
+	form                 *huh.Form
+	dateStr              string
+	lastValidDate        string
+	transitDateStr       string
+	transitLastValidDate string
+	userContext          string
+	city                 string
+	width                int
+	height               int
+	submitted            bool
+	loading              bool
+	err                  error
+	missingCity          bool
 }
 
 func New() Model {
 	city := os.Getenv("HOROSCOPE_CITY")
+	today := time.Now().Format("02/01/2006")
 	m := Model{
-		dateStr:     time.Now().Format("02/01/2006"),
-		city:        city,
-		missingCity: city == "",
+		dateStr:        today,
+		transitDateStr: today,
+		city:           city,
+		missingCity:    city == "",
 	}
 	if !m.missingCity {
 		m.initForm()
@@ -50,6 +54,13 @@ func (m *Model) initForm() {
 				Description("Format: JJ/MM/AAAA").
 				Placeholder("21/03/1990").
 				Value(&m.dateStr).
+				Validate(validateDate),
+			huh.NewInput().
+				Key("transit").
+				Title("Date de transit").
+				Description("Pour les prédictions (JJ/MM/AAAA)").
+				Placeholder("01/01/2025").
+				Value(&m.transitDateStr).
 				Validate(validateDate),
 			huh.NewText().
 				Key("context").
@@ -97,12 +108,22 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 		cmds = append(cmds, cmd)
 	}
 
-	// Check if date changed and is valid
+	// Check if birth date changed and is valid
 	if m.dateStr != m.lastValidDate && validateDate(m.dateStr) == nil {
 		m.lastValidDate = m.dateStr
 		if dateTime, err := m.GetDateTime(); err == nil {
 			cmds = append(cmds, func() tea.Msg {
 				return messages.DateChangedMsg{Date: dateTime}
+			})
+		}
+	}
+
+	// Check if transit date changed and is valid
+	if m.transitDateStr != m.transitLastValidDate && validateDate(m.transitDateStr) == nil {
+		m.transitLastValidDate = m.transitDateStr
+		if transitTime, err := m.GetTransitDateTime(); err == nil {
+			cmds = append(cmds, func() tea.Msg {
+				return messages.TransitDateChangedMsg{Date: transitTime}
 			})
 		}
 	}
@@ -158,6 +179,19 @@ func (m Model) GetDateTime() (time.Time, error) {
 	now := time.Now()
 	return time.Date(date.Year(), date.Month(), date.Day(),
 		now.Hour(), now.Minute(), 0, 0, time.Local), nil
+}
+
+func (m Model) GetTransitDateTime() (time.Time, error) {
+	dateStr := m.transitDateStr
+	if m.form != nil {
+		dateStr = m.form.GetString("transit")
+	}
+	date, err := time.Parse("02/01/2006", dateStr)
+	if err != nil {
+		return time.Time{}, err
+	}
+	return time.Date(date.Year(), date.Month(), date.Day(),
+		12, 0, 0, 0, time.Local), nil
 }
 
 func (m Model) GetUserContext() string {

@@ -26,6 +26,15 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "shift+tab":
 			m.cycleFocusReverse()
 			m = m.updateFocus()
+		case "esc":
+			if m.chart != nil {
+				m.form = m.form.Reset()
+				m.interp = m.interp.Reset()
+				m.chart = nil
+				m.focus = FocusForm
+				m = m.updateFocus()
+				return m, m.form.Init()
+			}
 		}
 
 	case tea.WindowSizeMsg:
@@ -42,6 +51,10 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.wheel = m.wheel.SetPositions(positions)
 		m.positions = m.positions.SetPositions(positions)
 		cmds = append(cmds, m.wheel.GenerateWheel())
+
+	case messages.TransitDateChangedMsg:
+		transitPositions := position.CalculateAll(msg.Date)
+		m.positions = m.positions.SetTransits(transitPositions)
 
 	case messages.GeocodingResultMsg:
 		if msg.Err != nil {
@@ -61,6 +74,12 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.header = m.header.SetChart(m.chart.DateTime, m.chart.Location, m.chart.Positions)
 		m.wheel = m.wheel.SetPositions(m.chart.Positions)
 		m.positions = m.positions.SetChart(m.chart)
+
+		// Set transit positions from form's transit date
+		if transitDate, err := m.form.GetTransitDateTime(); err == nil {
+			transitPositions := position.CalculateAll(transitDate)
+			m.positions = m.positions.SetTransits(transitPositions)
+		}
 
 		cmds = append(cmds, m.wheel.GenerateWheel())
 

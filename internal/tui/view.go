@@ -37,12 +37,31 @@ func (m Model) buildView() string {
 		statusLine = "\n" + styles.DimStyle.Render(m.status)
 	}
 
-	return lipgloss.JoinVertical(lipgloss.Left, headerView, mainContent) + statusLine
+	helpLine := m.renderHelpLine()
+
+	return lipgloss.JoinVertical(lipgloss.Left, headerView, mainContent) + statusLine + helpLine
+}
+
+func (m Model) renderHelpLine() string {
+	keyStyle := lipgloss.NewStyle().Foreground(styles.ColorBright)
+	sepStyle := styles.DimStyle
+
+	help := keyStyle.Render("tab") + sepStyle.Render("/") + keyStyle.Render("shift+tab") + sepStyle.Render(" naviguer • ") +
+		keyStyle.Render("↑↓") + sepStyle.Render(" défiler • ")
+
+	if m.chart != nil {
+		help += keyStyle.Render("esc") + sepStyle.Render(" nouvelle question • ")
+	}
+
+	help += keyStyle.Render("ctrl+c") + sepStyle.Render(" quitter")
+
+	return "\n" + lipgloss.NewStyle().Width(m.width).Align(lipgloss.Center).Render(help)
 }
 
 func (m Model) updateLayout() Model {
 	headerHeight := 3
-	contentHeight := m.height - headerHeight
+	helpLineHeight := 2
+	contentHeight := m.height - headerHeight - helpLineHeight
 
 	leftWidth := m.width / 2
 	rightWidth := m.width - leftWidth

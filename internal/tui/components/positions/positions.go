@@ -2,7 +2,6 @@ package positions
 
 import (
 	"fmt"
-	"time"
 
 	"github.com/charmbracelet/bubbles/table"
 	"github.com/charmbracelet/bubbles/viewport"
@@ -51,8 +50,16 @@ func (m Model) SetSize(width, height int) Model {
 }
 
 func (m Model) SetPositions(positions []position.Position) Model {
-	// Always show current transits before chart validation
-	m.transits = position.CalculateAll(time.Now())
+	m.transits = positions
+	if m.width > 0 {
+		m.table = m.buildTable()
+		m.viewport.SetContent(m.table.View())
+	}
+	return m
+}
+
+func (m Model) SetTransits(positions []position.Position) Model {
+	m.transits = positions
 	if m.width > 0 {
 		m.table = m.buildTable()
 		m.viewport.SetContent(m.table.View())
@@ -63,7 +70,6 @@ func (m Model) SetPositions(positions []position.Position) Model {
 func (m Model) SetChart(chart *horoscope.Chart) Model {
 	m.chart = chart
 	m.natal = chart.Positions
-	m.transits = position.CalculateAll(time.Now())
 	if m.width > 0 {
 		m.table = m.buildTable()
 		m.viewport.SetContent(m.table.View())
