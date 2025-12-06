@@ -50,7 +50,7 @@ func (g *SVGWheelGenerator) drawZodiacSegments(canvas *svg.SVG) {
 		sy := g.center - int(symbolRadius*math.Sin(midAngle))
 
 		color := getElementColor(s.sign.Element())
-		canvas.Text(sx, sy+14, s.sign.Symbol(), fmt.Sprintf("font-size:34px;fill:%s;text-anchor:middle;font-family:sans-serif", color))
+		drawSymbol(canvas, GetZodiacPath(s.sign), sx, sy+7, 34, color)
 	}
 }
 
@@ -100,16 +100,16 @@ func (g *SVGWheelGenerator) drawPlanetsRing(canvas *svg.SVG, positions []positio
 		x := g.center + int(adjustedRadius*math.Cos(angle))
 		y := g.center - int(adjustedRadius*math.Sin(angle))
 
-		var color, fontSize string
+		var color string
+		var size float64
 		if isTransit {
 			color = svgAccent
-			fontSize = "20px"
+			size = 20.0
 		} else {
 			color = getPlanetSVGColor(pos.Body)
-			fontSize = "28px"
+			size = 28.0
 		}
-
-		canvas.Text(x, y+5, pos.Body.Symbol(), fmt.Sprintf("font-size:%s;fill:%s;text-anchor:middle;font-family:sans-serif", fontSize, color))
+		drawSymbol(canvas, GetPlanetPath(pos.Body), x, y, size, color)
 	}
 }
 
