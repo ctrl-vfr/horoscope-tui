@@ -9,6 +9,10 @@ Calculates planetary positions with beautiful equations and generates a gorgeous
 
 ![Screenshot](./screenshot.png)
 
+## Demo
+
+![Demo](./demo.gif)
+
 ## Features
 
 - **Pure astronomical calculations** - No external ephemeris, just beautiful math
@@ -46,6 +50,7 @@ cargo install resvg
 ```bash
 export ASTRAL_CITY="Paris, France"
 export OPENAI_API_KEY="sk-..."
+export ASTRAL_OPENAI_MODEL="gpt-4o"  # optional, default: gpt-4o-mini
 ```
 
 ## Localization

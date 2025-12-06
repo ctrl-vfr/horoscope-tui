@@ -17,11 +17,15 @@ import (
 	"github.com/ctrl-vfr/astral-tui/pkg/position"
 )
 
-const openaiURL = "https://api.openai.com/v1/chat/completions"
+const (
+	openaiURL    = "https://api.openai.com/v1/chat/completions"
+	defaultModel = "gpt-4o-mini"
+)
 
 // OpenAIClient handles requests to OpenAI's GPT API.
 type OpenAIClient struct {
 	apiKey     string
+	model      string
 	httpClient *http.Client
 }
 
@@ -43,15 +47,22 @@ type chatResponse struct {
 	} `json:"choices"`
 }
 
-// NewOpenAIClient creates a new OpenAI client using OPENAI_API_KEY env var.
+// NewOpenAIClient creates a new OpenAI client.
+// Uses OPENAI_API_KEY for authentication and ASTRAL_OPENAI_MODEL to override the default model (gpt-4o-mini).
 func NewOpenAIClient() (*OpenAIClient, error) {
 	apiKey := os.Getenv("OPENAI_API_KEY")
 	if apiKey == "" {
 		return nil, fmt.Errorf("OPENAI_API_KEY not set")
 	}
 
+	model := os.Getenv("ASTRAL_OPENAI_MODEL")
+	if model == "" {
+		model = defaultModel
+	}
+
 	return &OpenAIClient{
 		apiKey:     apiKey,
+		model:      model,
 		httpClient: &http.Client{},
 	}, nil
 }
@@ -61,7 +72,7 @@ func (c *OpenAIClient) GetInterpretation(ctx context.Context, chart *horoscope.C
 	userPrompt := buildUserPrompt(chart, userContext)
 
 	reqBody := chatRequest{
-		Model: "gpt-4o",
+		Model: c.model,
 		Messages: []chatMessage{
 			{Role: "system", Content: i18n.SystemPrompt()},
 			{Role: "user", Content: userPrompt},
