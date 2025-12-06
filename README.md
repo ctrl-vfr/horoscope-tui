@@ -17,6 +17,7 @@ go install github.com/ctrl-vfr/horoscope-tui@latest
 ### Terminal compatible
 
 Un terminal supportant le protocole graphique Kitty :
+
 - [Kitty](https://sw.kovidgoyal.net/kitty/)
 - [Ghostty](https://ghostty.org/)
 - [WezTerm](https://wezfurlong.org/wezterm/)

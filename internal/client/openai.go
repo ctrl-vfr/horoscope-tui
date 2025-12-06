@@ -39,7 +39,7 @@ const systemPrompt = `Tu es un oracle cosmique complètement perché, mi-astrolo
 - Réponds DIRECTEMENT à la question (pas de généralités!)
 - UTILISE les transits ET le natal, pas juste l'un ou l'autre
 - Français, 300-400 mots max
-- Utilise les symboles zodiacales pour acompagner tes réponses :
+- Utilise les symboles planétaires: ☉ Soleil, ☽ Lune, ☿ Mercure, ♀ Vénus, ♂ Mars, ♃ Jupiter, ♄ Saturne, ♅ Uranus, ♆ Neptune, ♇ Pluton
 - Formate joliement tes réponses en Markdown`
 
 type OpenAIClient struct {
@@ -152,8 +152,8 @@ func buildUserPrompt(chart *horoscope.Chart, userQuestion string) string {
 			continue
 		}
 		zodiac := horoscope.LongitudeToZodiac(pos.EclipticLongitude)
-		sb.WriteString(fmt.Sprintf("- %s en %s à %d°%d'%s\n",
-			pos.Body.String(), zodiac.Sign.String(), zodiac.Degrees, zodiac.Minutes, retrogradeLabel(pos.Retrograde)))
+		sb.WriteString(fmt.Sprintf("- %s %s en %s à %d°%d'%s\n",
+			pos.Body.Symbol(), pos.Body.String(), zodiac.Sign.String(), zodiac.Degrees, zodiac.Minutes, retrogradeLabel(pos.Retrograde)))
 	}
 
 	// Birth chart data
@@ -164,14 +164,14 @@ func buildUserPrompt(chart *horoscope.Chart, userQuestion string) string {
 	sb.WriteString("Positions planétaires:\n")
 	for _, pos := range chart.Positions {
 		zodiac := horoscope.LongitudeToZodiac(pos.EclipticLongitude)
-		sb.WriteString(fmt.Sprintf("- %s en %s à %d°%d'%s\n",
-			pos.Body.String(), zodiac.Sign.String(), zodiac.Degrees, zodiac.Minutes, retrogradeLabel(pos.Retrograde)))
+		sb.WriteString(fmt.Sprintf("- %s %s en %s à %d°%d'%s\n",
+			pos.Body.Symbol(), pos.Body.String(), zodiac.Sign.String(), zodiac.Degrees, zodiac.Minutes, retrogradeLabel(pos.Retrograde)))
 	}
 
 	sb.WriteString("\nAspects majeurs:\n")
 	for _, aspect := range chart.Aspects {
-		sb.WriteString(fmt.Sprintf("- %s %s %s (orbe %.1f°)\n",
-			aspect.Body1.String(), aspect.Type.String(), aspect.Body2.String(), aspect.Orb))
+		sb.WriteString(fmt.Sprintf("- %s %s %s %s %s (orbe %.1f°)\n",
+			aspect.Body1.Symbol(), aspect.Body1.String(), aspect.Type.String(), aspect.Body2.Symbol(), aspect.Body2.String(), aspect.Orb))
 	}
 
 	// Element distribution
