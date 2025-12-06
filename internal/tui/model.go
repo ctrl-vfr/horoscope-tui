@@ -6,13 +6,13 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	zone "github.com/lrstanley/bubblezone"
 
-	"github.com/ctrl-vfr/horoscope-tui/internal/tui/components/form"
-	"github.com/ctrl-vfr/horoscope-tui/internal/tui/components/header"
-	"github.com/ctrl-vfr/horoscope-tui/internal/tui/components/interp"
-	"github.com/ctrl-vfr/horoscope-tui/internal/tui/components/positions"
-	"github.com/ctrl-vfr/horoscope-tui/internal/tui/components/wheel"
-	"github.com/ctrl-vfr/horoscope-tui/pkg/horoscope"
-	"github.com/ctrl-vfr/horoscope-tui/pkg/position"
+	"github.com/ctrl-vfr/astral-tui/internal/tui/components/form"
+	"github.com/ctrl-vfr/astral-tui/internal/tui/components/header"
+	"github.com/ctrl-vfr/astral-tui/internal/tui/components/interp"
+	"github.com/ctrl-vfr/astral-tui/internal/tui/components/positions"
+	"github.com/ctrl-vfr/astral-tui/internal/tui/components/wheel"
+	"github.com/ctrl-vfr/astral-tui/pkg/horoscope"
+	"github.com/ctrl-vfr/astral-tui/pkg/position"
 )
 
 // FocusArea represents the currently focused UI component.

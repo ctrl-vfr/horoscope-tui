@@ -5,12 +5,12 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 
-	"github.com/ctrl-vfr/horoscope-tui/internal/house"
-	"github.com/ctrl-vfr/horoscope-tui/internal/i18n"
-	"github.com/ctrl-vfr/horoscope-tui/internal/tui/components/wheel"
-	"github.com/ctrl-vfr/horoscope-tui/internal/tui/messages"
-	"github.com/ctrl-vfr/horoscope-tui/pkg/horoscope"
-	"github.com/ctrl-vfr/horoscope-tui/pkg/position"
+	"github.com/ctrl-vfr/astral-tui/internal/house"
+	"github.com/ctrl-vfr/astral-tui/internal/i18n"
+	"github.com/ctrl-vfr/astral-tui/internal/tui/components/wheel"
+	"github.com/ctrl-vfr/astral-tui/internal/tui/messages"
+	"github.com/ctrl-vfr/astral-tui/pkg/horoscope"
+	"github.com/ctrl-vfr/astral-tui/pkg/position"
 )
 
 // Update handles messages for the main TUI model.

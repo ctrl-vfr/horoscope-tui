@@ -7,16 +7,18 @@ import (
 
 	svg "github.com/ajstarks/svgo"
 
-	"github.com/ctrl-vfr/horoscope-tui/pkg/horoscope"
-	"github.com/ctrl-vfr/horoscope-tui/pkg/position"
+	"github.com/ctrl-vfr/astral-tui/pkg/horoscope"
+	"github.com/ctrl-vfr/astral-tui/pkg/position"
 )
 
+// drawOuterWheel draws the outer wheel of the wheel
 func (g *SVGWheelGenerator) drawOuterWheel(canvas *svg.SVG) {
 	canvas.Circle(g.center, g.center, g.radius, fmt.Sprintf("fill:none;stroke:%s;stroke-width:1;opacity:0.3", svgPrimary))
 	canvas.Circle(g.center, g.center, g.radius, fmt.Sprintf("fill:none;stroke:%s;stroke-width:1", svgPrimary))
 	canvas.Circle(g.center, g.center, g.radius-54, fmt.Sprintf("fill:none;stroke:%s;stroke-width:1", svgBorder))
 }
 
+// drawZodiacSegments draws the zodiac segments of the wheel
 func (g *SVGWheelGenerator) drawZodiacSegments(canvas *svg.SVG) {
 	signs := []struct {
 		sign  horoscope.ZodiacSign
@@ -54,6 +56,7 @@ func (g *SVGWheelGenerator) drawZodiacSegments(canvas *svg.SVG) {
 	}
 }
 
+// drawInnerCircle draws the inner circle of the wheel
 func (g *SVGWheelGenerator) drawInnerCircle(canvas *svg.SVG) {
 	innerRadius := int(float64(g.radius) * 0.65)
 	canvas.Circle(g.center, g.center, innerRadius, fmt.Sprintf("fill:none;stroke:%s;stroke-width:1", svgPrimary))
@@ -61,6 +64,7 @@ func (g *SVGWheelGenerator) drawInnerCircle(canvas *svg.SVG) {
 	canvas.Circle(g.center, g.center, 4, fmt.Sprintf("fill:%s", svgBright))
 }
 
+// drawAxes draws the axes of the wheel
 func (g *SVGWheelGenerator) drawAxes(canvas *svg.SVG) {
 	innerRadius := int(float64(g.radius) * 0.65)
 	canvas.Line(g.center, g.center-innerRadius, g.center, g.center+innerRadius, fmt.Sprintf("stroke:%s;stroke-width:1;stroke-dasharray:5,3", svgPurple))
@@ -71,17 +75,22 @@ func (g *SVGWheelGenerator) drawAxes(canvas *svg.SVG) {
 	canvas.Text(g.center-innerRadius-10, g.center+4, "DSC", fmt.Sprintf("font-size:10px;fill:%s;text-anchor:end", svgTextLight))
 }
 
+// drawPlanetsRing draws the planets ring of the wheel
 func (g *SVGWheelGenerator) drawPlanetsRing(canvas *svg.SVG, positions []position.Position, radiusFactor float64, isTransit bool) {
 	planetRadius := float64(g.radius) * radiusFactor
 
-	maxBody := position.Pluto
+	maxBody := position.Vesta
 	if isTransit {
-		maxBody = position.Neptune
+		maxBody = position.Vesta
 	}
 
 	// Filter and sort positions by longitude
 	var filtered []position.Position
 	for _, pos := range positions {
+		// Skip nodes, keep planets and asteroids
+		if pos.Body == position.NorthNode || pos.Body == position.SouthNode {
+			continue
+		}
 		if pos.Body <= maxBody {
 			filtered = append(filtered, pos)
 		}
@@ -90,8 +99,8 @@ func (g *SVGWheelGenerator) drawPlanetsRing(canvas *svg.SVG, positions []positio
 		return filtered[i].EclipticLongitude < filtered[j].EclipticLongitude
 	})
 
-	// Calculate radial offsets to avoid overlapping (threshold: 5°)
-	offsets := calculateRadialOffsets(filtered, 15.0)
+	// Calculate radial offsets to avoid overlapping
+	offsets := calculateRadialOffsets(filtered, 20.0)
 
 	for i, pos := range filtered {
 		angle := (90 - pos.EclipticLongitude) * math.Pi / 180
@@ -105,14 +114,21 @@ func (g *SVGWheelGenerator) drawPlanetsRing(canvas *svg.SVG, positions []positio
 		if isTransit {
 			color = svgAccent
 			size = 20.0
+			if pos.Body >= position.Chiron {
+				size = 16.0
+			}
 		} else {
 			color = getPlanetSVGColor(pos.Body)
-			size = 28.0
+			size = 25.0
+			if pos.Body >= position.Chiron {
+				size = 18.0
+			}
 		}
 		drawSymbol(canvas, GetPlanetPath(pos.Body), x, y, size, color)
 	}
 }
 
+// calculateRadialOffsets calculates the radial offsets to avoid overlapping
 func calculateRadialOffsets(positions []position.Position, threshold float64) []float64 {
 	offsets := make([]float64, len(positions))
 	const offsetStep = -25.0
@@ -134,46 +150,4 @@ func calculateRadialOffsets(positions []position.Position, threshold float64) []
 		}
 	}
 	return offsets
-}
-
-func (g *SVGWheelGenerator) drawAspects(canvas *svg.SVG, positions []position.Position) {
-	aspects := horoscope.CalculateAspects(positions, horoscope.TightOrbs)
-	planetRadius := float64(g.radius) * 0.35
-
-	for _, aspect := range aspects {
-		if aspect.Body1 > position.Saturn || aspect.Body2 > position.Saturn {
-			continue
-		}
-
-		var lon1, lon2 float64
-		for _, pos := range positions {
-			if pos.Body == aspect.Body1 {
-				lon1 = pos.EclipticLongitude
-			}
-			if pos.Body == aspect.Body2 {
-				lon2 = pos.EclipticLongitude
-			}
-		}
-
-		angle1 := (90 - lon1) * math.Pi / 180
-		angle2 := (90 - lon2) * math.Pi / 180
-
-		x1 := g.center + int(planetRadius*math.Cos(angle1))
-		y1 := g.center - int(planetRadius*math.Sin(angle1))
-		x2 := g.center + int(planetRadius*math.Cos(angle2))
-		y2 := g.center - int(planetRadius*math.Sin(angle2))
-
-		color := getAspectColor(aspect.Type)
-		opacity := 0.6 - aspect.Orb*0.05
-		if opacity < 0.2 {
-			opacity = 0.2
-		}
-
-		style := fmt.Sprintf("stroke:%s;stroke-width:1;opacity:%.1f", color, opacity)
-		if aspect.Type == horoscope.Trine || aspect.Type == horoscope.Sextile {
-			style += ";stroke-dasharray:4,2"
-		}
-
-		canvas.Line(x1, y1, x2, y2, style)
-	}
 }

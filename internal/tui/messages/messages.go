@@ -4,7 +4,7 @@ package messages
 import (
 	"time"
 
-	"github.com/ctrl-vfr/horoscope-tui/pkg/horoscope"
+	"github.com/ctrl-vfr/astral-tui/pkg/horoscope"
 )
 
 // FormSubmittedMsg is sent when the user submits the form

@@ -5,8 +5,8 @@ import (
 	"math"
 	"time"
 
-	"github.com/ctrl-vfr/horoscope-tui/pkg/horoscope"
-	"github.com/ctrl-vfr/horoscope-tui/pkg/position"
+	"github.com/ctrl-vfr/astral-tui/pkg/horoscope"
+	"github.com/ctrl-vfr/astral-tui/pkg/position"
 )
 
 // House represents a single house in the chart

@@ -1,8 +1,8 @@
 package render
 
 import (
-	"github.com/ctrl-vfr/horoscope-tui/pkg/horoscope"
-	"github.com/ctrl-vfr/horoscope-tui/pkg/position"
+	"github.com/ctrl-vfr/astral-tui/pkg/horoscope"
+	"github.com/ctrl-vfr/astral-tui/pkg/position"
 )
 
 // SVG color palette.
@@ -56,24 +56,10 @@ func getPlanetSVGColor(body position.CelestialBody) string {
 		return "#4169E1" // Royal blue
 	case position.Pluto:
 		return "#DC143C" // Crimson
+	case position.Chiron, position.Ceres, position.Pallas, position.Juno, position.Vesta:
+		return svgTextLight // Beige for asteroids
 	default:
 		return svgTextLight
 	}
 }
 
-func getAspectColor(aspectType horoscope.AspectType) string {
-	switch aspectType {
-	case horoscope.Conjunction:
-		return "#FFD700" // Gold
-	case horoscope.Sextile:
-		return "#32CD32" // Lime green (harmonious)
-	case horoscope.Trine:
-		return "#00BFFF" // Deep sky blue (harmonious)
-	case horoscope.Square:
-		return "#FF4500" // Orange-red (tension)
-	case horoscope.Opposition:
-		return "#FF1493" // Deep pink (tension)
-	default:
-		return svgTextLight
-	}
-}

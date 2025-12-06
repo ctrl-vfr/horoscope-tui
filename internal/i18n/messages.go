@@ -3,6 +3,7 @@ package i18n
 var messages = map[Lang]map[string]string{
 	EN: {
 		// Form
+		"FormTitle":                "Consult the Oracle",
 		"FormBirthDate":            "Birth date",
 		"FormBirthDateDesc":        "Format: DD/MM/YYYY",
 		"FormBirthDatePlaceholder": "21/03/1990",
@@ -29,7 +30,7 @@ var messages = map[Lang]map[string]string{
 		"StatusError":             "Error: ",
 
 		// Missing city
-		"MissingCityError": "HOROSCOPE_CITY variable missing",
+		"MissingCityError": "ASTRAL_CITY variable missing",
 		"MissingCityHint":  "Set the environment variable:",
 
 		// Header
@@ -86,10 +87,18 @@ var messages = map[Lang]map[string]string{
 		"PromptElementDist":     "Element distribution",
 		"PromptRetrograde":      " (RETROGRADE)",
 		"PromptOrb":             "orb",
+
+		// Preflight checks
+		"PreflightOpenAIHelp":  "export OPENAI_API_KEY=\"sk-...\"",
+		"PreflightCityHelp":    "export ASTRAL_CITY=\"Paris, France\"",
+		"PreflightTerminal":    "Terminal (Kitty graphics)",
+		"PreflightTerminalHelp": "Use Kitty, Ghostty or WezTerm terminal",
+		"PreflightResvgHelp":   "cargo install resvg\nor: brew install resvg",
 	},
 
 	FR: {
 		// Form
+		"FormTitle":                "Consulter l'Oracle",
 		"FormBirthDate":            "Date de naissance",
 		"FormBirthDateDesc":        "Format: JJ/MM/AAAA",
 		"FormBirthDatePlaceholder": "21/03/1990",
@@ -116,7 +125,7 @@ var messages = map[Lang]map[string]string{
 		"StatusError":             "Erreur: ",
 
 		// Missing city
-		"MissingCityError": "Variable HOROSCOPE_CITY manquante",
+		"MissingCityError": "Variable ASTRAL_CITY manquante",
 		"MissingCityHint":  "Définissez la variable d'environnement:",
 
 		// Header
@@ -173,10 +182,18 @@ var messages = map[Lang]map[string]string{
 		"PromptElementDist":     "Répartition des éléments",
 		"PromptRetrograde":      " (RÉTROGRADE)",
 		"PromptOrb":             "orbe",
+
+		// Preflight checks
+		"PreflightOpenAIHelp":  "export OPENAI_API_KEY=\"sk-...\"",
+		"PreflightCityHelp":    "export ASTRAL_CITY=\"Paris, France\"",
+		"PreflightTerminal":    "Terminal (Kitty graphics)",
+		"PreflightTerminalHelp": "Utilisez Kitty, Ghostty ou WezTerm",
+		"PreflightResvgHelp":   "cargo install resvg\nou: brew install resvg",
 	},
 
 	ES: {
 		// Form
+		"FormTitle":                "Consultar al Oráculo",
 		"FormBirthDate":            "Fecha de nacimiento",
 		"FormBirthDateDesc":        "Formato: DD/MM/AAAA",
 		"FormBirthDatePlaceholder": "21/03/1990",
@@ -203,7 +220,7 @@ var messages = map[Lang]map[string]string{
 		"StatusError":             "Error: ",
 
 		// Missing city
-		"MissingCityError": "Variable HOROSCOPE_CITY faltante",
+		"MissingCityError": "Variable ASTRAL_CITY faltante",
 		"MissingCityHint":  "Configure la variable de entorno:",
 
 		// Header
@@ -260,10 +277,18 @@ var messages = map[Lang]map[string]string{
 		"PromptElementDist":     "Distribución de elementos",
 		"PromptRetrograde":      " (RETRÓGRADO)",
 		"PromptOrb":             "orbe",
+
+		// Preflight checks
+		"PreflightOpenAIHelp":  "export OPENAI_API_KEY=\"sk-...\"",
+		"PreflightCityHelp":    "export ASTRAL_CITY=\"Paris, France\"",
+		"PreflightTerminal":    "Terminal (Kitty graphics)",
+		"PreflightTerminalHelp": "Use Kitty, Ghostty o WezTerm",
+		"PreflightResvgHelp":   "cargo install resvg\no: brew install resvg",
 	},
 
 	DE: {
 		// Form
+		"FormTitle":                "Das Orakel befragen",
 		"FormBirthDate":            "Geburtsdatum",
 		"FormBirthDateDesc":        "Format: TT/MM/JJJJ",
 		"FormBirthDatePlaceholder": "21/03/1990",
@@ -290,7 +315,7 @@ var messages = map[Lang]map[string]string{
 		"StatusError":             "Fehler: ",
 
 		// Missing city
-		"MissingCityError": "Variable HOROSCOPE_CITY fehlt",
+		"MissingCityError": "Variable ASTRAL_CITY fehlt",
 		"MissingCityHint":  "Setzen Sie die Umgebungsvariable:",
 
 		// Header
@@ -347,5 +372,12 @@ var messages = map[Lang]map[string]string{
 		"PromptElementDist":     "Elementverteilung",
 		"PromptRetrograde":      " (RÜCKLÄUFIG)",
 		"PromptOrb":             "Orbis",
+
+		// Preflight checks
+		"PreflightOpenAIHelp":  "export OPENAI_API_KEY=\"sk-...\"",
+		"PreflightCityHelp":    "export ASTRAL_CITY=\"Paris, France\"",
+		"PreflightTerminal":    "Terminal (Kitty graphics)",
+		"PreflightTerminalHelp": "Verwenden Sie Kitty, Ghostty oder WezTerm",
+		"PreflightResvgHelp":   "cargo install resvg\noder: brew install resvg",
 	},
 }

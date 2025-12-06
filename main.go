@@ -1,32 +1,24 @@
-// Package main is the entry point for the horoscope-tui application.
+// Package main is the entry point for the astral-tui application.
 package main
 
 import (
-	"log"
+	"fmt"
 	"os"
 
-	"github.com/ctrl-vfr/horoscope-tui/internal/cli"
-	"github.com/ctrl-vfr/horoscope-tui/internal/i18n"
+	"github.com/ctrl-vfr/astral-tui/internal/cli"
+	"github.com/ctrl-vfr/astral-tui/internal/i18n"
+	"github.com/ctrl-vfr/astral-tui/internal/preflight"
 )
 
-func init() {
+func main() {
 	i18n.Init()
 
-	if os.Getenv("OPENAI_API_KEY") == "" {
-		log.Fatal("OPENAI_API_KEY is not set")
+	results := preflight.RunChecks()
+	if !preflight.PrintResults(results) {
+		fmt.Println()
+		os.Exit(1)
 	}
 
-	if os.Getenv("HOROSCOPE_CITY") == "" {
-		log.Fatal("HOROSCOPE_CITY is not set")
-	}
-
-	term := os.Getenv("TERM")
-	if term != "xterm-kitty" && term != "xterm-ghostty" && term != "wezterm" {
-		log.Fatal("Terminal does not support Kitty graphics protocol")
-	}
-}
-
-func main() {
 	if err := cli.Execute(); err != nil {
 		os.Exit(1)
 	}

@@ -1,4 +1,7 @@
-# Horoscope TUI
+# Astral TUI
+
+[![Go Version](https://img.shields.io/badge/go-1.21+-blue.svg)](https://go.dev/)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
 Because science doesn't explain everything and computers are overrated, here's an app to calculate astrological charts in the terminal and answer your questions.
 
@@ -6,10 +9,18 @@ Calculates planetary positions with beautiful equations and generates a gorgeous
 
 ![Screenshot](./screenshot.png)
 
+## Features
+
+- **Pure astronomical calculations** - No external ephemeris, just beautiful math
+- **SVG zodiac wheel** - Generated and rendered via Kitty graphics protocol
+- **AI-powered Oracle** - GPT-4o interprets your chart with cosmic wisdom
+- **Multilingual** - English, French, Spanish, German
+- **Modern TUI** - Built with Charm's Bubble Tea
+
 ## Installation
 
 ```bash
-go install github.com/ctrl-vfr/horoscope-tui@latest
+go install github.com/ctrl-vfr/astral-tui@latest
 ```
 
 ## Prerequisites
@@ -33,7 +44,7 @@ cargo install resvg
 ### Environment Variables
 
 ```bash
-export HOROSCOPE_CITY="Paris, France"
+export ASTRAL_CITY="Paris, France"
 export OPENAI_API_KEY="sk-..."
 ```
 
@@ -46,6 +57,13 @@ Supported languages:
 - French
 - Spanish
 - German
+
+## How it works
+
+- Planetary positions calculated using Keplerian orbital elements
+- House cusps via Placidus system
+- SVG rendered to PNG with resvg, displayed via Kitty graphics protocol
+- Built with [Bubble Tea](https://github.com/charmbracelet/bubbletea), [Lip Gloss](https://github.com/charmbracelet/lipgloss), and [Huh](https://github.com/charmbracelet/huh)
 
 ## Disclaimer
 

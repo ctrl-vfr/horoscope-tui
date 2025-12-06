@@ -5,23 +5,26 @@ import (
 	"context"
 	"strings"
 
+	"github.com/charmbracelet/bubbles/spinner"
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/glamour"
 	"github.com/charmbracelet/lipgloss"
 
-	"github.com/ctrl-vfr/horoscope-tui/internal/client"
-	"github.com/ctrl-vfr/horoscope-tui/internal/i18n"
-	"github.com/ctrl-vfr/horoscope-tui/internal/tui/messages"
-	"github.com/ctrl-vfr/horoscope-tui/internal/tui/styles"
-	"github.com/ctrl-vfr/horoscope-tui/pkg/horoscope"
+	"github.com/ctrl-vfr/astral-tui/internal/client"
+	"github.com/ctrl-vfr/astral-tui/internal/i18n"
+	"github.com/ctrl-vfr/astral-tui/internal/tui/messages"
+	"github.com/ctrl-vfr/astral-tui/internal/tui/styles"
+	"github.com/ctrl-vfr/astral-tui/pkg/horoscope"
 )
 
 // Model is the interpretation component state.
 type Model struct {
 	viewport viewport.Model
+	spinner  spinner.Model
 	content  string
 	rendered string
+	question string
 	width    int
 	height   int
 	loading  bool
@@ -32,7 +35,10 @@ type Model struct {
 
 // New creates a new interpretation model.
 func New() Model {
-	return Model{}
+	s := spinner.New()
+	s.Spinner = spinner.Moon
+	s.Style = lipgloss.NewStyle().Foreground(lipgloss.Color("208"))
+	return Model{spinner: s}
 }
 
 // Init initializes the interpretation component.
@@ -67,6 +73,8 @@ func (m *Model) renderMarkdown() {
 
 // Update handles messages for the interpretation component.
 func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
+	var cmds []tea.Cmd
+
 	if msg, ok := msg.(messages.InterpReadyMsg); ok {
 		m.loading = false
 		if msg.Err != nil {
@@ -79,11 +87,20 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 		}
 	}
 
-	var cmd tea.Cmd
-	if m.focused {
-		m.viewport, cmd = m.viewport.Update(msg)
+	// Update spinner while loading
+	if m.loading {
+		var spinnerCmd tea.Cmd
+		m.spinner, spinnerCmd = m.spinner.Update(msg)
+		cmds = append(cmds, spinnerCmd)
 	}
-	return m, cmd
+
+	if m.focused {
+		var vpCmd tea.Cmd
+		m.viewport, vpCmd = m.viewport.Update(msg)
+		cmds = append(cmds, vpCmd)
+	}
+
+	return m, tea.Batch(cmds...)
 }
 
 // SetSize sets the component dimensions.
@@ -110,8 +127,9 @@ func (m Model) StartInterpretation(chart *horoscope.Chart, userContext string) (
 	m.loading = true
 	m.complete = false
 	m.content = ""
+	m.question = userContext
 	m.err = nil
-	return m, m.fetchCmd(chart, userContext)
+	return m, tea.Batch(m.fetchCmd(chart, userContext), m.spinner.Tick)
 }
 
 func (m Model) fetchCmd(chart *horoscope.Chart, userContext string) tea.Cmd {
@@ -139,10 +157,14 @@ func (m Model) View() string {
 	dimStyle := lipgloss.NewStyle().
 		Foreground(lipgloss.Color("240"))
 
+	questionStyle := lipgloss.NewStyle().
+		Italic(true).
+		Foreground(lipgloss.Color("223"))
+
 	var header string
 	switch {
 	case m.loading:
-		header = headerStyle.Render(i18n.T("InterpTitle")) + " " + dimStyle.Render(i18n.T("InterpLoading"))
+		header = headerStyle.Render(i18n.T("InterpTitle")) + " " + m.spinner.View()
 	case m.err != nil:
 		header = headerStyle.Render(i18n.T("InterpTitle")) + " " + lipgloss.NewStyle().Foreground(lipgloss.Color("160")).Render(i18n.T("InterpError"))
 	default:
@@ -153,10 +175,18 @@ func (m Model) View() string {
 	switch {
 	case m.err != nil:
 		content = lipgloss.NewStyle().Foreground(lipgloss.Color("160")).Render(m.err.Error())
+	case m.loading:
+		if m.question != "" {
+			content = questionStyle.Render("« " + m.question + " »")
+		}
 	case m.content == "" && !m.loading:
 		content = dimStyle.Render(i18n.T("StatusWaitingNatal"))
 	default:
-		content = m.viewport.View()
+		if m.question != "" {
+			content = questionStyle.Render("« "+m.question+" »") + "\n\n" + m.viewport.View()
+		} else {
+			content = m.viewport.View()
+		}
 	}
 
 	box := lipgloss.NewStyle().
@@ -182,6 +212,7 @@ func (m Model) HasError() bool {
 // Reset resets the component to its initial state.
 func (m Model) Reset() Model {
 	m.content = ""
+	m.question = ""
 	m.loading = false
 	m.complete = false
 	m.err = nil

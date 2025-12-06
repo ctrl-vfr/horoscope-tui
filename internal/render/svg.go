@@ -5,7 +5,7 @@ import (
 
 	svg "github.com/ajstarks/svgo"
 
-	"github.com/ctrl-vfr/horoscope-tui/pkg/position"
+	"github.com/ctrl-vfr/astral-tui/pkg/position"
 )
 
 // SVGWheelGenerator generates SVG zodiac wheels.
@@ -39,11 +39,10 @@ func (g *SVGWheelGenerator) GenerateWithTransits(natal, transits []position.Posi
 	g.drawZodiacSegments(canvas)
 	g.drawInnerCircle(canvas)
 	g.drawAxes(canvas)
-	g.drawPlanetsRing(canvas, natal, 0.40, false)
+	g.drawPlanetsRing(canvas, natal, 0.55, false)
 	if len(transits) > 0 {
 		g.drawPlanetsRing(canvas, transits, 0.55, true)
 	}
-	g.drawAspects(canvas, natal)
 	canvas.End()
 
 	return buf.Bytes()

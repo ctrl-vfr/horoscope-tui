@@ -1,4 +1,4 @@
-module github.com/ctrl-vfr/horoscope-tui
+module github.com/ctrl-vfr/astral-tui
 
 go 1.25.0
 

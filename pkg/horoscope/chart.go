@@ -4,7 +4,7 @@ package horoscope
 import (
 	"time"
 
-	"github.com/ctrl-vfr/horoscope-tui/pkg/position"
+	"github.com/ctrl-vfr/astral-tui/pkg/position"
 )
 
 // Chart represents a complete astrological chart

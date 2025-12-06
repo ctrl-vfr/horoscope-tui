@@ -4,8 +4,8 @@ import (
 	"github.com/charmbracelet/lipgloss"
 	zone "github.com/lrstanley/bubblezone"
 
-	"github.com/ctrl-vfr/horoscope-tui/internal/i18n"
-	"github.com/ctrl-vfr/horoscope-tui/internal/tui/styles"
+	"github.com/ctrl-vfr/astral-tui/internal/i18n"
+	"github.com/ctrl-vfr/astral-tui/internal/tui/styles"
 )
 
 // View renders the main TUI view.

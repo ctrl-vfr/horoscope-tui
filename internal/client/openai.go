@@ -12,9 +12,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ctrl-vfr/horoscope-tui/internal/i18n"
-	"github.com/ctrl-vfr/horoscope-tui/pkg/horoscope"
-	"github.com/ctrl-vfr/horoscope-tui/pkg/position"
+	"github.com/ctrl-vfr/astral-tui/internal/i18n"
+	"github.com/ctrl-vfr/astral-tui/pkg/horoscope"
+	"github.com/ctrl-vfr/astral-tui/pkg/position"
 )
 
 const openaiURL = "https://api.openai.com/v1/chat/completions"

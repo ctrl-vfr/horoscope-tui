@@ -9,8 +9,8 @@ import (
 
 	svg "github.com/ajstarks/svgo"
 
-	"github.com/ctrl-vfr/horoscope-tui/pkg/horoscope"
-	"github.com/ctrl-vfr/horoscope-tui/pkg/position"
+	"github.com/ctrl-vfr/astral-tui/pkg/horoscope"
+	"github.com/ctrl-vfr/astral-tui/pkg/position"
 )
 
 //go:embed symbols/zodiac/*.svg symbols/planets/*.svg
@@ -57,6 +57,10 @@ func init() {
 		"pluto.svg":     position.Pluto,
 		"northnode.svg": position.NorthNode,
 		"southnode.svg": position.SouthNode,
+		"ceres.svg":     position.Ceres,
+		"pallas.svg":    position.Pallas,
+		"juno.svg":      position.Juno,
+		"vesta.svg":     position.Vesta,
 	}
 
 	for filename, sign := range zodiacFiles {

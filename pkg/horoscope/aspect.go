@@ -3,7 +3,7 @@ package horoscope
 import (
 	"math"
 
-	"github.com/ctrl-vfr/horoscope-tui/pkg/position"
+	"github.com/ctrl-vfr/astral-tui/pkg/position"
 )
 
 // AspectType represents a type of astrological aspect

@@ -4,16 +4,17 @@ package form
 import (
 	"errors"
 	"os"
+	"strings"
 	"time"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/huh"
 	"github.com/charmbracelet/lipgloss"
 
-	"github.com/ctrl-vfr/horoscope-tui/internal/client"
-	"github.com/ctrl-vfr/horoscope-tui/internal/i18n"
-	"github.com/ctrl-vfr/horoscope-tui/internal/tui/messages"
-	"github.com/ctrl-vfr/horoscope-tui/internal/tui/styles"
+	"github.com/ctrl-vfr/astral-tui/internal/client"
+	"github.com/ctrl-vfr/astral-tui/internal/i18n"
+	"github.com/ctrl-vfr/astral-tui/internal/tui/messages"
+	"github.com/ctrl-vfr/astral-tui/internal/tui/styles"
 )
 
 // Model is the form component state.
@@ -35,7 +36,7 @@ type Model struct {
 
 // New creates a new form model.
 func New() Model {
-	city := os.Getenv("HOROSCOPE_CITY")
+	city := os.Getenv("ASTRAL_CITY")
 	today := time.Now().Format("02/01/2006")
 	m := Model{
 		dateStr:        today,
@@ -226,13 +227,20 @@ func (m Model) View() string {
 		return box.Render(m.missingCityContent())
 	}
 
+	headerStyle := lipgloss.NewStyle().
+		Bold(true).
+		Foreground(lipgloss.Color("202"))
+
+	header := headerStyle.Render(i18n.T("FormTitle"))
+	separator := strings.Repeat("─", m.width-6)
+
 	if m.loading {
-		return box.Render(lipgloss.NewStyle().
+		return box.Render(header + "\n" + separator + "\n" + lipgloss.NewStyle().
 			Foreground(lipgloss.Color("240")).
 			Render(i18n.T("StatusGeocoding")))
 	}
 
-	return box.Render(m.form.View())
+	return box.Render(header + "\n" + separator + "\n" + m.form.View())
 }
 
 func (m Model) missingCityContent() string {
@@ -245,7 +253,7 @@ func (m Model) missingCityContent() string {
 
 	return errorStyle.Render(i18n.T("MissingCityError")) + "\n\n" +
 		dimStyle.Render(i18n.T("MissingCityHint")) + "\n" +
-		dimStyle.Render("export HOROSCOPE_CITY=\"Paris, France\"")
+		dimStyle.Render("export ASTRAL_CITY=\"Paris, France\"")
 }
 
 // Reset resets the form to its initial state.
