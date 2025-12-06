@@ -28,5 +28,4 @@ CLAUDE.md
 .claude/
 
 # Generated
-*.svg
 !screenshot.png
