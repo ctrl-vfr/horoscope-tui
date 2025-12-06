@@ -114,21 +114,21 @@ func calculatePlanet(body CelestialBody, d float64) Position {
 }
 
 // solveKepler solves Kepler's equation M = E - e*sin(E) iteratively
-// M is mean anomaly in radians, e is eccentricity
+// meanAnom is mean anomaly in radians, e is eccentricity
 // Returns eccentric anomaly E in radians
-func solveKepler(M float64, e float64) float64 {
+func solveKepler(meanAnom float64, e float64) float64 {
 	// Initial approximation
-	E := M + e*math.Sin(M)*(1.0+e*math.Cos(M))
+	eccAnom := meanAnom + e*math.Sin(meanAnom)*(1.0+e*math.Cos(meanAnom))
 
 	// Newton-Raphson iteration
 	for i := 0; i < 15; i++ {
-		E1 := E - (E-e*math.Sin(E)-M)/(1-e*math.Cos(E))
-		if math.Abs(E1-E) < 1e-12 {
+		next := eccAnom - (eccAnom-e*math.Sin(eccAnom)-meanAnom)/(1-e*math.Cos(eccAnom))
+		if math.Abs(next-eccAnom) < 1e-12 {
 			break
 		}
-		E = E1
+		eccAnom = next
 	}
-	return E
+	return eccAnom
 }
 
 // CalculateAll computes positions for all celestial bodies at a given time

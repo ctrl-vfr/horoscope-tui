@@ -1,3 +1,4 @@
+// Package styles provides shared styling for TUI components.
 package styles
 
 import (

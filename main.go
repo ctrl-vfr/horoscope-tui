@@ -1,3 +1,4 @@
+// Package main is the entry point for the horoscope-tui application.
 package main
 
 import (
@@ -5,9 +6,12 @@ import (
 	"os"
 
 	"github.com/ctrl-vfr/horoscope-tui/internal/cli"
+	"github.com/ctrl-vfr/horoscope-tui/internal/i18n"
 )
 
 func init() {
+	i18n.Init()
+
 	if os.Getenv("OPENAI_API_KEY") == "" {
 		log.Fatal("OPENAI_API_KEY is not set")
 	}

@@ -1,3 +1,4 @@
+// Package messages defines the message types used for TUI component communication.
 package messages
 
 import (
@@ -6,21 +7,23 @@ import (
 	"github.com/ctrl-vfr/horoscope-tui/pkg/horoscope"
 )
 
-// Form messages
+// FormSubmittedMsg is sent when the user submits the form
 type FormSubmittedMsg struct {
 	Date time.Time
 	City string
 }
 
+// DateChangedMsg is sent when the user changes the date
 type DateChangedMsg struct {
 	Date time.Time
 }
 
+// TransitDateChangedMsg is sent when the user changes the transit date
 type TransitDateChangedMsg struct {
 	Date time.Time
 }
 
-// Geocoding messages
+// GeocodingResultMsg is sent when the user submits the form
 type GeocodingResultMsg struct {
 	Latitude    float64
 	Longitude   float64
@@ -28,30 +31,32 @@ type GeocodingResultMsg struct {
 	Err         error
 }
 
-// Chart calculation messages
+// ChartReadyMsg is sent when the chart is ready
 type ChartReadyMsg struct {
 	Chart *horoscope.Chart
 }
 
+// ChartErrorMsg is sent when the chart generation fails
 type ChartErrorMsg struct {
 	Err error
 }
 
-// Wheel generation messages
+// WheelGeneratedMsg is sent when the wheel is generated
 type WheelGeneratedMsg struct {
 	PNGData []byte
 	Err     error
 }
 
-// GPT interpretation messages
+// InterpReadyMsg is sent when the interpretation is ready
 type InterpReadyMsg struct {
 	Content string
 	Err     error
 }
 
-// Status messages
+// StatusMsg is sent when the status changes
 type StatusMsg string
 
+// ErrorMsg is sent when an error occurs
 type ErrorMsg struct {
 	Err error
 }

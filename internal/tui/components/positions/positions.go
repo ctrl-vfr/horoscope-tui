@@ -1,3 +1,4 @@
+// Package positions provides the planetary positions table component.
 package positions
 
 import (
@@ -8,11 +9,13 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 
+	"github.com/ctrl-vfr/horoscope-tui/internal/i18n"
 	"github.com/ctrl-vfr/horoscope-tui/internal/tui/styles"
 	"github.com/ctrl-vfr/horoscope-tui/pkg/horoscope"
 	"github.com/ctrl-vfr/horoscope-tui/pkg/position"
 )
 
+// Model is the positions table component state.
 type Model struct {
 	viewport viewport.Model
 	table    table.Model
@@ -24,14 +27,17 @@ type Model struct {
 	focused  bool
 }
 
+// New creates a new positions model.
 func New() Model {
 	return Model{}
 }
 
+// Init initializes the positions component.
 func (m Model) Init() tea.Cmd {
 	return nil
 }
 
+// Update handles messages for the positions component.
 func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	var cmd tea.Cmd
 	if m.focused {
@@ -40,6 +46,7 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	return m, cmd
 }
 
+// SetSize sets the component dimensions.
 func (m Model) SetSize(width, height int) Model {
 	m.width = width
 	m.height = height
@@ -49,6 +56,7 @@ func (m Model) SetSize(width, height int) Model {
 	return m
 }
 
+// SetPositions sets the transit positions to display.
 func (m Model) SetPositions(positions []position.Position) Model {
 	m.transits = positions
 	if m.width > 0 {
@@ -58,6 +66,7 @@ func (m Model) SetPositions(positions []position.Position) Model {
 	return m
 }
 
+// SetTransits updates the current transit positions.
 func (m Model) SetTransits(positions []position.Position) Model {
 	m.transits = positions
 	if m.width > 0 {
@@ -67,6 +76,7 @@ func (m Model) SetTransits(positions []position.Position) Model {
 	return m
 }
 
+// SetChart sets the natal chart to display alongside transits.
 func (m Model) SetChart(chart *horoscope.Chart) Model {
 	m.chart = chart
 	m.natal = chart.Positions
@@ -77,6 +87,7 @@ func (m Model) SetChart(chart *horoscope.Chart) Model {
 	return m
 }
 
+// SetFocus sets the focus state of the component.
 func (m Model) SetFocus(focused bool) Model {
 	m.focused = focused
 	return m
@@ -98,10 +109,10 @@ func (m Model) buildTable() table.Model {
 
 		columns = []table.Column{
 			{Title: "", Width: 3},
-			{Title: "Planète", Width: planetWidth},
-			{Title: "Natal", Width: posWidth},
+			{Title: i18n.T("PositionPlanet"), Width: planetWidth},
+			{Title: i18n.T("PositionNatal"), Width: posWidth},
 			{Title: "℞", Width: 3},
-			{Title: "Transit", Width: posWidth},
+			{Title: i18n.T("PositionTransit"), Width: posWidth},
 			{Title: "℞", Width: 3},
 		}
 		rows = m.buildCombinedRows()
@@ -113,8 +124,8 @@ func (m Model) buildTable() table.Model {
 
 		columns = []table.Column{
 			{Title: "", Width: 3},
-			{Title: "Planète", Width: planetWidth},
-			{Title: "Position", Width: posWidth},
+			{Title: i18n.T("PositionPlanet"), Width: planetWidth},
+			{Title: i18n.T("PositionPosition"), Width: posWidth},
 			{Title: "℞", Width: 3},
 		}
 		rows = m.buildTransitRows()
@@ -195,15 +206,16 @@ func (m Model) buildCombinedRows() []table.Row {
 	return rows
 }
 
+// View renders the positions component.
 func (m Model) View() string {
 	borderColor := lipgloss.Color("94")
 	if m.focused {
 		borderColor = styles.ColorPrimary
 	}
 
-	title := "Transits"
+	title := i18n.T("PositionTransits")
 	if m.chart != nil {
-		title = "Natal / Transits"
+		title = i18n.T("PositionBoth")
 	}
 
 	header := lipgloss.NewStyle().

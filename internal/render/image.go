@@ -1,3 +1,4 @@
+// Package render provides SVG to PNG conversion and terminal graphics support.
 package render
 
 import (
@@ -24,8 +25,8 @@ func SVGToPNG(svgData []byte, width, height int) ([]byte, error) {
 	if err := os.WriteFile(svgPath, svgData, 0644); err != nil {
 		return nil, fmt.Errorf("failed to write SVG: %w", err)
 	}
-	defer os.Remove(svgPath)
-	defer os.Remove(pngPath)
+	defer func() { _ = os.Remove(svgPath) }()
+	defer func() { _ = os.Remove(pngPath) }()
 
 	// Run resvg
 	args := []string{

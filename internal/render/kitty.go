@@ -45,7 +45,7 @@ func (k *KittyGraphics) DisplayPNG(pngData []byte, cols, rows int) error {
 		return fmt.Errorf("failed to encode graphics: %w", err)
 	}
 
-	fmt.Fprintln(k.writer)
+	_, _ = fmt.Fprintln(k.writer)
 	return nil
 }
 
@@ -152,7 +152,7 @@ func DeleteImage(w io.Writer, imageID int) {
 		Delete: kitty.DeleteID,
 		Quite:  2,
 	}
-	kitty.EncodeGraphics(w, nil, opts)
+	_ = kitty.EncodeGraphics(w, nil, opts)
 }
 
 // PNGToImage converts PNG data to image.Image
@@ -183,20 +183,20 @@ func SupportsKittyGraphics() bool {
 func (k *KittyGraphics) ClearImage() {
 	// a=d: delete
 	// d=A: delete all images
-	fmt.Fprint(k.writer, "\x1b_Ga=d,d=A\x1b\\")
+	_, _ = fmt.Fprint(k.writer, "\x1b_Ga=d,d=A\x1b\\")
 }
 
 // MoveCursor moves the cursor to a specific position
 func (k *KittyGraphics) MoveCursor(row, col int) {
-	fmt.Fprintf(k.writer, "\x1b[%d;%dH", row, col)
+	_, _ = fmt.Fprintf(k.writer, "\x1b[%d;%dH", row, col)
 }
 
 // SaveCursor saves the current cursor position
 func (k *KittyGraphics) SaveCursor() {
-	fmt.Fprint(k.writer, "\x1b7")
+	_, _ = fmt.Fprint(k.writer, "\x1b7")
 }
 
 // RestoreCursor restores the saved cursor position
 func (k *KittyGraphics) RestoreCursor() {
-	fmt.Fprint(k.writer, "\x1b8")
+	_, _ = fmt.Fprint(k.writer, "\x1b8")
 }

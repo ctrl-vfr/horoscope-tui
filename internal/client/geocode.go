@@ -10,10 +10,12 @@ import (
 
 const nominatimURL = "https://nominatim.openstreetmap.org/search"
 
+// GeocodingClient handles geocoding requests to Nominatim API.
 type GeocodingClient struct {
 	httpClient *http.Client
 }
 
+// GeocodingResult contains the result of a geocoding query.
 type GeocodingResult struct {
 	Latitude    float64
 	Longitude   float64
@@ -26,6 +28,7 @@ type nominatimResponse struct {
 	DisplayName string `json:"display_name"`
 }
 
+// NewGeocodingClient creates a new geocoding client.
 func NewGeocodingClient() *GeocodingClient {
 	return &GeocodingClient{
 		httpClient: &http.Client{
@@ -34,6 +37,7 @@ func NewGeocodingClient() *GeocodingClient {
 	}
 }
 
+// Search looks up coordinates for a city name using Nominatim.
 func (c *GeocodingClient) Search(city string) (*GeocodingResult, error) {
 	params := url.Values{}
 	params.Add("q", city)
@@ -53,7 +57,7 @@ func (c *GeocodingClient) Search(city string) (*GeocodingResult, error) {
 	if err != nil {
 		return nil, fmt.Errorf("request failed: %w", err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("nominatim returned status %d", resp.StatusCode)

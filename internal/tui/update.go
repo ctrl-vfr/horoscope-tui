@@ -6,12 +6,14 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 
 	"github.com/ctrl-vfr/horoscope-tui/internal/house"
+	"github.com/ctrl-vfr/horoscope-tui/internal/i18n"
 	"github.com/ctrl-vfr/horoscope-tui/internal/tui/components/wheel"
 	"github.com/ctrl-vfr/horoscope-tui/internal/tui/messages"
 	"github.com/ctrl-vfr/horoscope-tui/pkg/horoscope"
 	"github.com/ctrl-vfr/horoscope-tui/pkg/position"
 )
 
+// Update handles messages for the main TUI model.
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmds []tea.Cmd
 
@@ -58,10 +60,10 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	case messages.GeocodingResultMsg:
 		if msg.Err != nil {
-			m.status = "Erreur géocodage: " + msg.Err.Error()
+			m.status = i18n.T("StatusGeocodingError") + msg.Err.Error()
 			m.form = m.form.Reset()
 		} else {
-			m.status = "Calcul du thème..."
+			m.status = i18n.T("StatusCalculating")
 			dateTime, _ := m.form.GetDateTime()
 			cmds = append(cmds, m.calculateChart(dateTime, msg.Latitude, msg.Longitude, msg.DisplayName))
 		}
@@ -129,8 +131,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 func (m Model) calculateChart(dateTime time.Time, lat, lon float64, location string) tea.Cmd {
 	return func() tea.Msg {
 		positions := position.CalculateAll(dateTime)
-		calc := house.NewCalculator(house.Placidus)
-		houseCusps := calc.Calculate(lat, lon, dateTime)
+		houseCusps := house.Calculate(lat, lon, dateTime)
 		aspects := horoscope.CalculateAspects(positions, horoscope.DefaultOrbs)
 
 		chart := &horoscope.Chart{

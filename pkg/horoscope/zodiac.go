@@ -7,6 +7,7 @@ import (
 // ZodiacSign represents one of the 12 zodiac signs
 type ZodiacSign int
 
+// The twelve zodiac signs in order.
 const (
 	Aries ZodiacSign = iota
 	Taurus
@@ -75,6 +76,7 @@ var signSymbols = map[ZodiacSign]string{
 // Element represents the four classical elements
 type Element int
 
+// The four classical elements.
 const (
 	Fire Element = iota
 	Earth
@@ -82,6 +84,7 @@ const (
 	Water
 )
 
+// String returns the name of the element.
 func (e Element) String() string {
 	return []string{"Fire", "Earth", "Air", "Water"}[e]
 }
@@ -96,12 +99,14 @@ var signElements = map[ZodiacSign]Element{
 // Modality represents the three modalities
 type Modality int
 
+// The three modalities.
 const (
 	Cardinal Modality = iota
 	Fixed
 	Mutable
 )
 
+// String returns the name of the modality.
 func (m Modality) String() string {
 	return []string{"Cardinal", "Fixed", "Mutable"}[m]
 }

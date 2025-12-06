@@ -1,3 +1,4 @@
+// Package wheel provides the zodiac wheel visualization component.
 package wheel
 
 import (
@@ -8,6 +9,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 
+	"github.com/ctrl-vfr/horoscope-tui/internal/i18n"
 	"github.com/ctrl-vfr/horoscope-tui/internal/render"
 	"github.com/ctrl-vfr/horoscope-tui/internal/tui/messages"
 	"github.com/ctrl-vfr/horoscope-tui/pkg/position"
@@ -15,6 +17,7 @@ import (
 
 const imageID = 42 // Fixed image ID for the zodiac wheel
 
+// Model is the zodiac wheel component state.
 type Model struct {
 	positions        []position.Position
 	pngData          []byte
@@ -28,14 +31,17 @@ type Model struct {
 	err              error
 }
 
+// New creates a new wheel model.
 func New() Model {
 	return Model{}
 }
 
+// Init initializes the wheel component.
 func (m Model) Init() tea.Cmd {
 	return nil
 }
 
+// Update handles messages for the wheel component.
 func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case messages.WheelGeneratedMsg:
@@ -72,6 +78,7 @@ func (m Model) transmitImage() tea.Cmd {
 	}
 }
 
+// SetSize sets the component dimensions.
 func (m Model) SetSize(width, height int) Model {
 	m.width = width
 	m.height = height
@@ -90,6 +97,7 @@ func (m Model) SetSize(width, height int) Model {
 	return m
 }
 
+// SetPositions sets the natal positions for the wheel.
 func (m Model) SetPositions(positions []position.Position) Model {
 	m.positions = positions
 	m.loading = true
@@ -98,10 +106,12 @@ func (m Model) SetPositions(positions []position.Position) Model {
 	return m
 }
 
+// HasPositions returns true if natal positions are set.
 func (m Model) HasPositions() bool {
 	return len(m.positions) > 0
 }
 
+// GenerateWheel generates the zodiac wheel image.
 func (m Model) GenerateWheel() tea.Cmd {
 	natalPositions := m.positions
 	return func() tea.Msg {
@@ -147,6 +157,7 @@ func (m Model) GenerateTransitsOnly() tea.Cmd {
 	}
 }
 
+// View renders the wheel component.
 func (m Model) View() string {
 	borderStyle := lipgloss.NewStyle().
 		Border(lipgloss.RoundedBorder()).
@@ -156,15 +167,15 @@ func (m Model) View() string {
 		Align(lipgloss.Center, lipgloss.Center)
 
 	if m.loading {
-		return borderStyle.Render("Génération de la roue...")
+		return borderStyle.Render(i18n.T("StatusGeneratingWheel"))
 	}
 
 	if m.err != nil {
-		return borderStyle.Render(fmt.Sprintf("Erreur: %v", m.err))
+		return borderStyle.Render(fmt.Sprintf("%s%v", i18n.T("StatusError"), m.err))
 	}
 
 	if !m.imageReady || len(m.pngData) == 0 {
-		return borderStyle.Render("En attente des données...")
+		return borderStyle.Render(i18n.T("StatusWaitingData"))
 	}
 
 	// Check if terminal supports Kitty graphics
@@ -174,7 +185,7 @@ func (m Model) View() string {
 
 	// Wait for image to be transmitted before showing placeholders
 	if !m.imageTransmitted {
-		return borderStyle.Render("Transmission de l'image...")
+		return borderStyle.Render(i18n.T("StatusTransmittingImage"))
 	}
 
 	// Return Unicode placeholder grid wrapped in border
@@ -190,13 +201,15 @@ func (m Model) asciiPlaceholder() string {
 		Align(lipgloss.Center, lipgloss.Center).
 		Foreground(lipgloss.Color("240"))
 
-	return style.Render("[ Roue zodiacale ]\n(Kitty/resvg requis)")
+	return style.Render(i18n.T("WheelPlaceholder"))
 }
 
+// IsReady returns true if the wheel image is ready to display.
 func (m Model) IsReady() bool {
 	return m.imageReady && len(m.pngData) > 0
 }
 
+// RetransmitImage retransmits the wheel image to the terminal.
 func (m Model) RetransmitImage() tea.Cmd {
 	return m.transmitImage()
 }

@@ -1,3 +1,4 @@
+// Package position provides celestial body position calculations.
 package position
 
 // CelestialBody represents a celestial object.
@@ -6,6 +7,7 @@ type CelestialBody int
 // RetrogradeSymbol is the astrological symbol for retrograde motion.
 const RetrogradeSymbol = "℞"
 
+// Celestial bodies used in astrological calculations.
 const (
 	Sun CelestialBody = iota
 	Moon

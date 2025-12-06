@@ -4,12 +4,14 @@ import (
 	"github.com/charmbracelet/lipgloss"
 	zone "github.com/lrstanley/bubblezone"
 
+	"github.com/ctrl-vfr/horoscope-tui/internal/i18n"
 	"github.com/ctrl-vfr/horoscope-tui/internal/tui/styles"
 )
 
+// View renders the main TUI view.
 func (m Model) View() string {
 	if m.width == 0 || m.height == 0 {
-		return "Chargement..."
+		return i18n.T("StatusLoading")
 	}
 	return zone.Scan(m.buildView())
 }
@@ -46,14 +48,14 @@ func (m Model) renderHelpLine() string {
 	keyStyle := lipgloss.NewStyle().Foreground(styles.ColorBright)
 	sepStyle := styles.DimStyle
 
-	help := keyStyle.Render("tab") + sepStyle.Render("/") + keyStyle.Render("shift+tab") + sepStyle.Render(" naviguer • ") +
-		keyStyle.Render("↑↓") + sepStyle.Render(" défiler • ")
+	help := keyStyle.Render("tab") + sepStyle.Render("/") + keyStyle.Render("shift+tab") + sepStyle.Render(i18n.T("NavNavigate")+" • ") +
+		keyStyle.Render("↑↓") + sepStyle.Render(i18n.T("NavScroll")+" • ")
 
 	if m.chart != nil {
-		help += keyStyle.Render("esc") + sepStyle.Render(" nouvelle question • ")
+		help += keyStyle.Render("esc") + sepStyle.Render(i18n.T("NavNewQuestion")+" • ")
 	}
 
-	help += keyStyle.Render("ctrl+c") + sepStyle.Render(" quitter")
+	help += keyStyle.Render("ctrl+c") + sepStyle.Render(i18n.T("NavQuit"))
 
 	return "\n" + lipgloss.NewStyle().Width(m.width).Align(lipgloss.Center).Render(help)
 }

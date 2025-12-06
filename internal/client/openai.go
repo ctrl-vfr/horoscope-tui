@@ -1,3 +1,4 @@
+// Package client provides a client for OpenAI's GPT-4 API.
 package client
 
 import (
@@ -11,37 +12,14 @@ import (
 	"strings"
 	"time"
 
+	"github.com/ctrl-vfr/horoscope-tui/internal/i18n"
 	"github.com/ctrl-vfr/horoscope-tui/pkg/horoscope"
 	"github.com/ctrl-vfr/horoscope-tui/pkg/position"
 )
 
 const openaiURL = "https://api.openai.com/v1/chat/completions"
 
-const systemPrompt = `Tu es un oracle cosmique complètement perché, mi-astrologue mi-voyant extralucide.
-
-## MISSION CRITIQUE: L'utilisateur te pose une **QUESTION SPECIFIQUE**. Tu DOIS y répondre en combinant:
-- Les **TRANSITS** DU JOUR (où sont les planètes MAINTENANT) → timing, énergie du moment
-- Le **THÈME NATAL** (positions à la naissance) → personnalité, tendances profondes
-
-## COMMENT REPONDRE:
-1. Lis la question posée
-2. Regarde les TRANSITS (positions d'aujourd'hui) pour le timing et l'énergie actuelle
-3. Compare avec le THÈME NATAL pour voir comment ça résonne avec la personne
-4. Cite des positions SPECIFIQUES des deux pour justifier ta réponse
-
-## TON STYLE:
-- Oracle déjanté qui canalise des entités astrales farfelues
-- Métaphores cosmiques absurdes mais conseils étrangement pertinents
-- CITE au moins 1-2 transits ET 1-2 positions natales
-- Prédictions décalées et avertissements mystérieux, décalés et rigolos
-
-## REGLES:
-- Réponds DIRECTEMENT à la question (pas de généralités!)
-- UTILISE les transits ET le natal, pas juste l'un ou l'autre
-- Français, 300-400 mots max
-- Utilise les symboles planétaires: ☉ Soleil, ☽ Lune, ☿ Mercure, ♀ Vénus, ♂ Mars, ♃ Jupiter, ♄ Saturne, ♅ Uranus, ♆ Neptune, ♇ Pluton
-- Formate joliement tes réponses en Markdown`
-
+// OpenAIClient handles requests to OpenAI's GPT API.
 type OpenAIClient struct {
 	apiKey     string
 	httpClient *http.Client
@@ -65,6 +43,7 @@ type chatResponse struct {
 	} `json:"choices"`
 }
 
+// NewOpenAIClient creates a new OpenAI client using OPENAI_API_KEY env var.
 func NewOpenAIClient() (*OpenAIClient, error) {
 	apiKey := os.Getenv("OPENAI_API_KEY")
 	if apiKey == "" {
@@ -77,13 +56,14 @@ func NewOpenAIClient() (*OpenAIClient, error) {
 	}, nil
 }
 
+// GetInterpretation requests an astrological interpretation from GPT-4.
 func (c *OpenAIClient) GetInterpretation(ctx context.Context, chart *horoscope.Chart, userContext string) (string, error) {
 	userPrompt := buildUserPrompt(chart, userContext)
 
 	reqBody := chatRequest{
 		Model: "gpt-4o",
 		Messages: []chatMessage{
-			{Role: "system", Content: systemPrompt},
+			{Role: "system", Content: i18n.SystemPrompt()},
 			{Role: "user", Content: userPrompt},
 		},
 	}
@@ -105,7 +85,7 @@ func (c *OpenAIClient) GetInterpretation(ctx context.Context, chart *horoscope.C
 	if err != nil {
 		return "", fmt.Errorf("request failed: %w", err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
@@ -133,61 +113,57 @@ func buildUserPrompt(chart *horoscope.Chart, userQuestion string) string {
 
 	// User question first - if no question, ask for general reading
 	if userQuestion != "" {
-		sb.WriteString(fmt.Sprintf("## QUESTION: %s\n\n", userQuestion))
+		sb.WriteString(fmt.Sprintf("## %s: %s\n\n", i18n.T("PromptQuestion"), userQuestion))
 	} else {
-		sb.WriteString("## QUESTION: Donne-moi une lecture cosmique générale pour aujourd'hui basée sur mon thème.\n\n")
+		sb.WriteString(fmt.Sprintf("## %s: %s\n\n", i18n.T("PromptQuestion"), i18n.T("PromptDefaultQuestion")))
 	}
 
 	// Today's date and transits
 	now := time.Now()
-	sb.WriteString(fmt.Sprintf("Aujourd'hui: %s (%s)\n\n",
+	sb.WriteString(fmt.Sprintf("%s: %s (%s)\n\n",
+		i18n.T("PromptToday"),
 		now.Format("02/01/2006"),
-		frenchWeekday(now.Weekday())))
+		i18n.Weekday(int(now.Weekday()))))
 
 	// Current planetary positions (transits)
-	sb.WriteString("## TRANSITS DU JOUR (positions actuelles):\n")
+	sb.WriteString(fmt.Sprintf("## %s:\n", i18n.T("PromptTransitsTitle")))
 	todayPositions := position.CalculateAll(now)
 	for _, pos := range todayPositions {
 		if !pos.Body.IsMainPlanet() {
 			continue
 		}
 		zodiac := horoscope.LongitudeToZodiac(pos.EclipticLongitude)
-		sb.WriteString(fmt.Sprintf("- %s %s en %s à %d°%d'%s\n",
+		sb.WriteString(fmt.Sprintf("- %s %s: %s %d°%d'%s\n",
 			pos.Body.Symbol(), pos.Body.String(), zodiac.Sign.String(), zodiac.Degrees, zodiac.Minutes, retrogradeLabel(pos.Retrograde)))
 	}
 
 	// Birth chart data
-	sb.WriteString("\n## THÈME NATAL (positions à la naissance):\n")
-	sb.WriteString(fmt.Sprintf("Date de naissance: %s\n", chart.DateTime.Format("02/01/2006 15:04")))
-	sb.WriteString(fmt.Sprintf("Lieu: %s (%.4f, %.4f)\n\n", chart.Location, chart.Latitude, chart.Longitude))
+	sb.WriteString(fmt.Sprintf("\n## %s:\n", i18n.T("PromptNatalTitle")))
+	sb.WriteString(fmt.Sprintf("%s: %s\n", i18n.T("PromptBirthDate"), chart.DateTime.Format("02/01/2006 15:04")))
+	sb.WriteString(fmt.Sprintf("%s: %s (%.4f, %.4f)\n\n", i18n.T("PromptLocation"), chart.Location, chart.Latitude, chart.Longitude))
 
-	sb.WriteString("Positions planétaires:\n")
+	sb.WriteString(fmt.Sprintf("%s:\n", i18n.T("PromptPlanetPositions")))
 	for _, pos := range chart.Positions {
 		zodiac := horoscope.LongitudeToZodiac(pos.EclipticLongitude)
-		sb.WriteString(fmt.Sprintf("- %s %s en %s à %d°%d'%s\n",
+		sb.WriteString(fmt.Sprintf("- %s %s: %s %d°%d'%s\n",
 			pos.Body.Symbol(), pos.Body.String(), zodiac.Sign.String(), zodiac.Degrees, zodiac.Minutes, retrogradeLabel(pos.Retrograde)))
 	}
 
-	sb.WriteString("\nAspects majeurs:\n")
+	sb.WriteString(fmt.Sprintf("\n%s:\n", i18n.T("PromptMajorAspects")))
 	for _, aspect := range chart.Aspects {
-		sb.WriteString(fmt.Sprintf("- %s %s %s %s %s (orbe %.1f°)\n",
-			aspect.Body1.Symbol(), aspect.Body1.String(), aspect.Type.String(), aspect.Body2.Symbol(), aspect.Body2.String(), aspect.Orb))
+		sb.WriteString(fmt.Sprintf("- %s %s %s %s %s (%s %.1f°)\n",
+			aspect.Body1.Symbol(), aspect.Body1.String(), aspect.Type.String(), aspect.Body2.Symbol(), aspect.Body2.String(), i18n.T("PromptOrb"), aspect.Orb))
 	}
 
 	// Element distribution
 	elements := calculateElements(chart.Positions)
-	sb.WriteString("\nRépartition des éléments:\n")
-	sb.WriteString(fmt.Sprintf("- Feu: %d planètes\n", elements[horoscope.Fire]))
-	sb.WriteString(fmt.Sprintf("- Terre: %d planètes\n", elements[horoscope.Earth]))
-	sb.WriteString(fmt.Sprintf("- Air: %d planètes\n", elements[horoscope.Air]))
-	sb.WriteString(fmt.Sprintf("- Eau: %d planètes\n", elements[horoscope.Water]))
+	sb.WriteString(fmt.Sprintf("\n%s:\n", i18n.T("PromptElementDist")))
+	sb.WriteString(fmt.Sprintf("- %s: "+i18n.T("ElementCount")+"\n", i18n.T("ElementFire"), elements[horoscope.Fire]))
+	sb.WriteString(fmt.Sprintf("- %s: "+i18n.T("ElementCount")+"\n", i18n.T("ElementEarth"), elements[horoscope.Earth]))
+	sb.WriteString(fmt.Sprintf("- %s: "+i18n.T("ElementCount")+"\n", i18n.T("ElementAir"), elements[horoscope.Air]))
+	sb.WriteString(fmt.Sprintf("- %s: "+i18n.T("ElementCount")+"\n", i18n.T("ElementWater"), elements[horoscope.Water]))
 
 	return sb.String()
-}
-
-func frenchWeekday(w time.Weekday) string {
-	days := []string{"Dimanche", "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi"}
-	return days[w]
 }
 
 func calculateElements(positions []position.Position) map[horoscope.Element]int {
@@ -204,7 +180,7 @@ func calculateElements(positions []position.Position) map[horoscope.Element]int 
 
 func retrogradeLabel(isRetro bool) string {
 	if isRetro {
-		return " (RÉTROGRADE)"
+		return i18n.T("PromptRetrograde")
 	}
 	return ""
 }

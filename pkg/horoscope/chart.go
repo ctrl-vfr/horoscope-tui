@@ -1,3 +1,4 @@
+// Package horoscope provides astrological calculations
 package horoscope
 
 import (

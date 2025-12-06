@@ -1,3 +1,4 @@
+// Package tui contains the main TUI application.
 package tui
 
 import (
@@ -7,6 +8,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
+// Run starts the TUI application.
 func Run() error {
 	p := tea.NewProgram(
 		NewModel(),

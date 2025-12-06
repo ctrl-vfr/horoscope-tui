@@ -18,6 +18,7 @@ import (
 // FocusArea represents the currently focused UI component.
 type FocusArea int
 
+// Focus areas for keyboard navigation.
 const (
 	FocusForm FocusArea = iota
 	FocusInterp

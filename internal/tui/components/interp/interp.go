@@ -1,3 +1,4 @@
+// Package interp provides the astrological interpretation display component.
 package interp
 
 import (
@@ -10,11 +11,13 @@ import (
 	"github.com/charmbracelet/lipgloss"
 
 	"github.com/ctrl-vfr/horoscope-tui/internal/client"
+	"github.com/ctrl-vfr/horoscope-tui/internal/i18n"
 	"github.com/ctrl-vfr/horoscope-tui/internal/tui/messages"
 	"github.com/ctrl-vfr/horoscope-tui/internal/tui/styles"
 	"github.com/ctrl-vfr/horoscope-tui/pkg/horoscope"
 )
 
+// Model is the interpretation component state.
 type Model struct {
 	viewport viewport.Model
 	content  string
@@ -27,10 +30,12 @@ type Model struct {
 	err      error
 }
 
+// New creates a new interpretation model.
 func New() Model {
 	return Model{}
 }
 
+// Init initializes the interpretation component.
 func (m Model) Init() tea.Cmd {
 	return nil
 }
@@ -60,9 +65,9 @@ func (m *Model) renderMarkdown() {
 	m.rendered = rendered
 }
 
+// Update handles messages for the interpretation component.
 func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
-	switch msg := msg.(type) {
-	case messages.InterpReadyMsg:
+	if msg, ok := msg.(messages.InterpReadyMsg); ok {
 		m.loading = false
 		if msg.Err != nil {
 			m.err = msg.Err
@@ -71,16 +76,6 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 			m.content = msg.Content
 			m.renderMarkdown()
 			m.viewport.SetContent(m.rendered)
-		}
-
-	case tea.KeyMsg:
-		if m.focused {
-			switch msg.String() {
-			case "r":
-				if m.err != nil {
-					// Allow retry - handled by parent
-				}
-			}
 		}
 	}
 
@@ -91,6 +86,7 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	return m, cmd
 }
 
+// SetSize sets the component dimensions.
 func (m Model) SetSize(width, height int) Model {
 	m.width = width
 	m.height = height
@@ -103,11 +99,13 @@ func (m Model) SetSize(width, height int) Model {
 	return m
 }
 
+// SetFocus sets the focus state of the component.
 func (m Model) SetFocus(focused bool) Model {
 	m.focused = focused
 	return m
 }
 
+// StartInterpretation begins fetching an interpretation from OpenAI.
 func (m Model) StartInterpretation(chart *horoscope.Chart, userContext string) (Model, tea.Cmd) {
 	m.loading = true
 	m.complete = false
@@ -127,6 +125,7 @@ func (m Model) fetchCmd(chart *horoscope.Chart, userContext string) tea.Cmd {
 	}
 }
 
+// View renders the interpretation component.
 func (m Model) View() string {
 	borderColor := lipgloss.Color("94")
 	if m.focused {
@@ -141,20 +140,22 @@ func (m Model) View() string {
 		Foreground(lipgloss.Color("240"))
 
 	var header string
-	if m.loading {
-		header = headerStyle.Render("Interprétation") + " " + dimStyle.Render("(chargement...)")
-	} else if m.err != nil {
-		header = headerStyle.Render("Interprétation") + " " + lipgloss.NewStyle().Foreground(lipgloss.Color("160")).Render("[Erreur]")
-	} else {
-		header = headerStyle.Render("Interprétation")
+	switch {
+	case m.loading:
+		header = headerStyle.Render(i18n.T("InterpTitle")) + " " + dimStyle.Render(i18n.T("InterpLoading"))
+	case m.err != nil:
+		header = headerStyle.Render(i18n.T("InterpTitle")) + " " + lipgloss.NewStyle().Foreground(lipgloss.Color("160")).Render(i18n.T("InterpError"))
+	default:
+		header = headerStyle.Render(i18n.T("InterpTitle"))
 	}
 
 	var content string
-	if m.err != nil {
+	switch {
+	case m.err != nil:
 		content = lipgloss.NewStyle().Foreground(lipgloss.Color("160")).Render(m.err.Error())
-	} else if m.content == "" && !m.loading {
-		content = dimStyle.Render("En attente du thème natal...")
-	} else {
+	case m.content == "" && !m.loading:
+		content = dimStyle.Render(i18n.T("StatusWaitingNatal"))
+	default:
 		content = m.viewport.View()
 	}
 
@@ -168,14 +169,17 @@ func (m Model) View() string {
 	return box.Render(header + "\n" + strings.Repeat("─", m.width-6) + "\n" + content)
 }
 
+// IsLoading returns true if an interpretation is being fetched.
 func (m Model) IsLoading() bool {
 	return m.loading
 }
 
+// HasError returns true if an error occurred.
 func (m Model) HasError() bool {
 	return m.err != nil
 }
 
+// Reset resets the component to its initial state.
 func (m Model) Reset() Model {
 	m.content = ""
 	m.loading = false

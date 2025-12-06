@@ -9,6 +9,7 @@ import (
 // AspectType represents a type of astrological aspect
 type AspectType int
 
+// Aspect types with their exact angles.
 const (
 	Conjunction AspectType = iota // 0 degrees
 	Sextile                       // 60 degrees
